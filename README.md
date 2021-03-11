@@ -1,2 +1,2 @@
 # ARES
-Advanced Robotic Exploring System
+Advanced Robotic Exploration System

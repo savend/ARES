@@ -1,0 +1,3 @@
+[submodule "OpenCR"]
+	path = OpenCR
+	url = https://github.com/ROBOTIS-GIT/OpenCR

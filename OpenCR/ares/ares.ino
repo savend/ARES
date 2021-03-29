@@ -17,14 +17,15 @@
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 /* Modified for ARES Robot: Audric Strumpler */
 
-#include "turtlebot3_ares.h"
+#include "ares.h"
+
 
 /*******************************************************************************
 * Setup function
 *******************************************************************************/
 void setup()
 {
-  DEBUG_SERIAL.begin(57600);
+  DEBUG_SERIAL.begin(9600);
 
   // Initialize ROS node handle, advertise and subscribe the topics
   nh.initNode();
@@ -46,8 +47,7 @@ void setup()
 
   tf_broadcaster.init(nh);
 
-  // Setting for Dynamixel motors
-  motor_driver.init("ARES");
+  motor_driver.init();
 
   // Setting for IMU
   sensors.init();
@@ -86,10 +86,17 @@ void loop()
     updateGoalVelocity();
     if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) 
     {
-      goal_velocity = zero_velocity
+
+      goal_velocity[0] = zero_velocity[0];
+      goal_velocity[1] = zero_velocity[1];
       controlAres();
     } 
     else {
+            char log_msg[50];
+
+
+  sprintf(log_msg, "Goal velocity to control Ares");
+  nh.loginfo(log_msg);
       controlAres();
     }
     tTime[0] = t;
@@ -180,7 +187,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 /*******************************************************************************
 * Callback function for sound msg
 *******************************************************************************/
-void soundCallback(const turtlebot3_msgs::Sound& sound_msg)
+void soundCallback(const ares_msgs::Sound& sound_msg)
 {
   sensors.makeSound(sound_msg.value);
 }
@@ -192,7 +199,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
   bool dxl_power = power_msg.data;
 
-  motor_driver.setTorque(dxl_power);
+  //motor_driver.setTorque(dxl_power);
 }
 
 /*******************************************************************************
@@ -280,7 +287,7 @@ void publishSensorStateMsg(void)
   
   sensor_state_msg.button = sensors.checkPushButton();
 
-  sensor_state_msg.torque = motor_driver.getTorque();
+//  sensor_state_msg.torque = motor_driver.getTorque();
 
   sensor_state_pub.publish(&sensor_state_msg);
 }
@@ -305,7 +312,7 @@ void publishBatteryStateMsg(void)
   battery_state_msg.header.stamp = rosNow();
   battery_state_msg.design_capacity = 1.8f; //Ah
   battery_state_msg.voltage = sensors.checkVoltage();
-  battery_state_msg.percentage = (float)(battery_state_msg.voltage / 11.1f);
+  battery_state_msg.percentage = (float)(battery_state_msg.voltage / 9.0f);
 
   if (battery_state == 0)
     battery_state_msg.present = false;
@@ -576,10 +583,12 @@ bool calcOdometry(double diff_time)
 }
 
 /*******************************************************************************
-* Turtlebot3 test drive using push buttons
+* Ares test drive using push buttons
 *******************************************************************************/
 void driveTest(uint8_t buttons)
 {
+
+
   static bool move[2] = {false, false};
   static int32_t saved_tick[2] = {0, 0};
   static double diff_encoder = 0.0;
@@ -592,6 +601,7 @@ void driveTest(uint8_t buttons)
   {
     move[LINEAR] = true;
     saved_tick[RIGHT_REAR] = current_tick[RIGHT_REAR];
+
 
     diff_encoder = TEST_DISTANCE / ((WHEEL_RADIUS*2*3.141592) / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
     tTime[6] = millis();
@@ -610,6 +620,10 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT_REAR] - current_tick[RIGHT_REAR]) <= diff_encoder)
     {
       goal_velocity_from_button[LINEAR]  = 0.05;
+      char log_msg[50];
+  sprintf(log_msg, "In Method driveTest");
+      nh.loginfo(log_msg);
+      
       tTime[6] = millis();
     }
     else
@@ -816,6 +830,7 @@ void updateGoalVelocity(void)
   goal_velocity[ANGULAR] = goal_velocity_from_button[ANGULAR] + goal_velocity_from_cmd[ANGULAR] + goal_velocity_from_rc100[ANGULAR];
 
   sensors.setLedPattern(goal_velocity[LINEAR], goal_velocity[ANGULAR]);
+
 }
 
 /*******************************************************************************
@@ -848,7 +863,7 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("DYNAMIXELS");
   DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("Torque : " + String(motor_driver.getTorque()));
+//  DEBUG_SERIAL.println("Torque : " + String(motor_driver.getTorque()));
 
   int32_t encoder[WHEEL_NUM] = {0, 0, 0, 0};
   motor_driver.readEncoder(encoder[LEFT_REAR], encoder[RIGHT_REAR], encoder[LEFT_FRONT], encoder[RIGHT_FRONT]);
@@ -859,7 +874,7 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("Encoder(right_front) : " + String(encoder[RIGHT_FRONT]));
 
   DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("TurtleBot3");
+  DEBUG_SERIAL.println("Ares");
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("Odometry : ");   
   DEBUG_SERIAL.print("         x : "); DEBUG_SERIAL.println(odom_pose[0]);
@@ -872,6 +887,9 @@ void sendDebuglog(void)
 *******************************************************************************/
 void controlAres(void)
 {
+  
+
+
   bool dxl_comm_result = false;
 
   double wheel1_spd_cmd, wheel2_spd_cmd, wheel3_spd_cmd, wheel4_spd_cmd;
@@ -926,7 +944,10 @@ void controlAres(void)
     lin_vel4 = -LIMIT_X_MAX_VELOCITY;
   }
 
+
   dxl_comm_result = motor_driver.controlMotor((int64_t)lin_vel1, (int64_t)lin_vel2, (int64_t)lin_vel3, (int64_t)lin_vel4);
   if (dxl_comm_result == false)
     return;
+   
+  
 }

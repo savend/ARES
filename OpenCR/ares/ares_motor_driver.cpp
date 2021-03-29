@@ -17,9 +17,9 @@
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 /* Modified for ARES Robot: Audric Strumpler */
 
-#include "turtlebot3_ares_motor_driver.h"
+#include "ares_motor_driver.h"
 
-Turtlebot3MotorDriver::Turtlebot3MotorDriver()
+AresMotorDriver::AresMotorDriver()
 : baudrate_(BAUDRATE),
   protocol_version_(PROTOCOL_VERSION),
   left_rear_wheel_id_(DXL_LEFT_REAR_ID), right_rear_wheel_id_(DXL_RIGHT_REAR_ID),
@@ -27,12 +27,12 @@ Turtlebot3MotorDriver::Turtlebot3MotorDriver()
 {
 }
 
-Turtlebot3MotorDriver::~Turtlebot3MotorDriver()
+AresMotorDriver::~AresMotorDriver()
 {
   closeDynamixel();
 }
 
-bool Turtlebot3MotorDriver::init(void)
+bool AresMotorDriver::init(void)
 {
   portHandler_   = dynamixel::PortHandler::getPortHandler(DEVICENAME);
   packetHandler_ = dynamixel::PacketHandler::getPacketHandler(PROTOCOL_VERSION);
@@ -73,7 +73,7 @@ bool Turtlebot3MotorDriver::init(void)
   return true;
 }
 
-bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
+bool AresMotorDriver::setTorque(uint8_t id, bool onoff)
 {
   uint8_t dxl_error = 0;
   int dxl_comm_result = COMM_TX_FAIL;
@@ -89,7 +89,7 @@ bool Turtlebot3MotorDriver::setTorque(uint8_t id, bool onoff)
   }
 }
 
-void Turtlebot3MotorDriver::closeDynamixel(void)
+void AresMotorDriver::closeDynamixel(void)
 {
   // Disable Dynamixel Torque
   setTorque(left_rear_wheel_id_, false);
@@ -101,7 +101,7 @@ void Turtlebot3MotorDriver::closeDynamixel(void)
   portHandler_->closePort();
 }
 
-bool Turtlebot3MotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_value, int32_t &left_front_value, int32_t &right_front_value,)
+bool AresMotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_value, int32_t &left_front_value, int32_t &right_front_value)
 {
   int dxl_comm_result = COMM_TX_FAIL;              // Communication result
   bool dxl_addparam_result = false;                // addParam result
@@ -155,7 +155,7 @@ bool Turtlebot3MotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right
   return true;
 }
 
-bool Turtlebot3MotorDriver::controlMotor(int64_t left_rear_wheel_value, int64_t right_rear_wheel_value, int64_t left_front_wheel_value, int64_t right_front_wheel_value)
+bool AresMotorDriver::controlMotor(int64_t left_rear_wheel_value, int64_t right_rear_wheel_value, int64_t left_front_wheel_value, int64_t right_front_wheel_value)
 {
   bool dxl_addparam_result_;
   int8_t dxl_comm_result_;

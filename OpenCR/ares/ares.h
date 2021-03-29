@@ -17,8 +17,8 @@
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 /* Modified for ARES Robot: Audric Strumpler */
 
-#ifndef TURTLEBOT3_ARES_H
-#define TURTLEBOT3_ARES_H
+#ifndef ARES_H
+#define ARES_H
 #define NOETIC_SUPPORT
 
 #include <ros.h>
@@ -32,11 +32,10 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
-#include <turtlebot3_ares_msgs/SensorState.h>
-#include <turtlebot3_msgs/Sound.h>
-#include <turtlebot3_msgs/VersionInfo.h>
+#include "ares_msgs/SensorState.h"
+#include "ares_msgs/Sound.h"
+#include "ares_msgs/VersionInfo.h"
 
-#include <TurtleBot3.h>
 
 #include <math.h>
 
@@ -44,9 +43,13 @@
 
 #include <RC100.h>
 
-#include "turtlebot3_monster_motor_driver.h"
+#include "ares_motor_driver.h"
+#include "ares_sensor.h"
+#include "ares_controller.h"
+#include "ares_diagnosis.h"
 
-#define WHEEL_RADIUS                    0.033     // meter
+
+#define WHEEL_RADIUS                    0.075     // meter
 #define WHEEL_SEPARATION                0.16      // meter (BURGER => 0.16, WAFFLE => 0.287)
 #define TURNING_RADIUS                  0.080     //****** // meter (BURGER : 0.080, WAFFLE : 0.1435)
 #define ROBOT_RADIUS                    0.105     //****** // meter (BURGER : 0.105, WAFFLE : 0.220)
@@ -74,6 +77,9 @@
 #define MAX_ANGULAR_VELOCITY            2.84   // rad/s
 //#define MAX_LINEAR_VELOCITY             (WHEEL_RADIUS * 2 * 3.14159265359 * 61 / 60) // m/s  (BURGER : 61[rpm], WAFFLE : 77[rpm])
 //#define MAX_ANGULAR_VELOCITY            (MAX_LINEAR_VELOCITY / TURNING_RADIUS)       // rad/s
+#define MIN_LINEAR_VELOCITY              -MAX_LINEAR_VELOCITY  
+#define MIN_ANGULAR_VELOCITY             -MAX_ANGULAR_VELOCITY 
+
 #define VELOCITY_LINEAR_X               0.01   // m/s
 #define VELOCITY_ANGULAR_Z              0.1    // rad/s
 #define SCALE_VELOCITY_LINEAR_X         1
@@ -121,7 +127,7 @@
 
 // Callback function prototypes
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
-void soundCallback(const turtlebot3_msgs::Sound& sound_msg);
+void soundCallback(const ares_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 
@@ -182,7 +188,7 @@ char joint_state_header_frame_id[30];
 *******************************************************************************/
 ros::Subscriber<geometry_msgs::Twist> cmd_vel_sub("cmd_vel", commandVelocityCallback);
 
-ros::Subscriber<turtlebot3_msgs::Sound> sound_sub("sound", soundCallback);
+ros::Subscriber<ares_msgs::Sound> sound_sub("sound", soundCallback);
 
 ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallback);
 
@@ -191,31 +197,31 @@ ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 /*******************************************************************************
 * Publisher
 *******************************************************************************/
-// Bumpers, cliffs, buttons, encoders, battery of Turtlebot3
-turtlebot3_ares_msgs::SensorState sensor_state_msg;
+// Bumpers, cliffs, buttons, encoders, battery of Ares
+ares_msgs::SensorState sensor_state_msg;
 ros::Publisher sensor_state_pub("sensor_state", &sensor_state_msg);
 
-// Version information of Turtlebot3
-turtlebot3_msgs::VersionInfo version_info_msg;
+// Version information of Ares
+ares_msgs::VersionInfo version_info_msg;
 ros::Publisher version_info_pub("firmware_version", &version_info_msg);
 
-// IMU of Turtlebot3
+// IMU of Ares
 sensor_msgs::Imu imu_msg;
 ros::Publisher imu_pub("imu", &imu_msg);
 
-// Command velocity of Turtlebot3 using RC100 remote controller
+// Command velocity of Ares using RC100 remote controller
 geometry_msgs::Twist cmd_vel_rc100_msg;
 ros::Publisher cmd_vel_rc100_pub("cmd_vel_rc100", &cmd_vel_rc100_msg);
 
-// Odometry of Turtlebot3
+// Odometry of Ares
 nav_msgs::Odometry odom;
 ros::Publisher odom_pub("odom", &odom);
 
-// Joint(Dynamixel) state of Turtlebot3
+// Joint(Dynamixel) state of Ares
 sensor_msgs::JointState joint_states;
 ros::Publisher joint_states_pub("joint_states", &joint_states);
 
-// Battey state of Turtlebot3
+// Battey state of Ares
 #if defined NOETIC_SUPPORT
 sensor_msgs::BatteryStateNoetic battery_state_msg;
 #else
@@ -230,19 +236,19 @@ ros::Publisher mag_pub("magnetic_field", &mag_msg);
 /*******************************************************************************
 * Transform Broadcaster
 *******************************************************************************/
-// TF of Turtlebot3
+// TF of Ares
 geometry_msgs::TransformStamped odom_tf;
 tf::TransformBroadcaster tf_broadcaster;
 
 /*******************************************************************************
-* SoftwareTimer of Turtlebot3
+* SoftwareTimer of Ares
 *******************************************************************************/
 static uint32_t tTime[10];
 
 /*******************************************************************************
 * Declaration for motor
 *******************************************************************************/
-Turtlebot3MotorDriver motor_driver;
+AresMotorDriver motor_driver;
 
 /*******************************************************************************
 * Calculation for odometry
@@ -259,13 +265,13 @@ double  last_velocity[WHEEL_NUM]  = {0.0, 0.0, 0.0, 0.0};
 /*******************************************************************************
 * Declaration for sensors
 *******************************************************************************/
-Turtlebot3Sensor sensors;
+AresSensor sensors;
 
 /*******************************************************************************
 * Declaration for controllers
 *******************************************************************************/
-Turtlebot3Controller controllers;
-float zero_velocity[2] = {0.0, 0.0;
+AresController controllers;
+float zero_velocity[2] = {0.0, 0.0};
 float goal_velocity[2] = {0.0, 0.0};
 float goal_velocity_from_button[2] = {0.0, 0.0};
 float goal_velocity_from_cmd[2] = {0.0, 0.0};
@@ -274,7 +280,7 @@ float goal_velocity_from_rc100[2] = {0.0, 0.0};
 /*******************************************************************************
 * Declaration for diagnosis
 *******************************************************************************/
-Turtlebot3Diagnosis diagnosis;
+AresDiagnosis diagnosis;
 
 /*******************************************************************************
 * Declaration for SLAM and navigation
@@ -289,4 +295,4 @@ double odom_vel[3];
 bool setup_end        = false;
 uint8_t battery_state = 0;
 
-#endif // TURTLEBOT3_ARES_H_
+#endif // ARES_H_

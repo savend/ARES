@@ -1,5 +1,5 @@
-#ifndef _ROS_turtlebot3_ares_msgs_SensorState_h
-#define _ROS_turtlebot3_ares_msgs_SensorState_h
+#ifndef _ROS_ares_msgs_SensorState_h
+#define _ROS_ares_msgs_SensorState_h
 
 #include <stdint.h>
 #include <string.h>
@@ -7,7 +7,7 @@
 #include "ros/msg.h"
 #include "std_msgs/Header.h"
 
-namespace turtlebot3_ares_msgs
+namespace ares_msgs
 {
 
   class SensorState : public ros::Msg
@@ -279,7 +279,7 @@ namespace turtlebot3_ares_msgs
      return offset;
     }
 
-    const char * getType(){ return "turtlebot3_ares_msgs/SensorState"; };
+    const char * getType(){ return "ares_msgs/SensorState"; };
     const char * getMD5(){ return "7250c1dc0b61c4190e78f528f599285f"; };
 
   };

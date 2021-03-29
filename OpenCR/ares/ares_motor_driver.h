@@ -17,8 +17,8 @@
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
 /* Modified for ARES Robot: Audric Strumpler */
 
-#ifndef TURTLEBOT3_ARES_MOTOR_DRIVER_H_
-#define TURTLEBOT3_ARES_MOTOR_DRIVER_H_
+#ifndef ARES_MOTOR_DRIVER_H_
+#define ARES_MOTOR_DRIVER_H_
 
 #include <DynamixelSDK.h>
 
@@ -32,8 +32,8 @@
 #define ADDR_X_PRESENT_VELOCITY         128
 #define ADDR_X_PRESENT_POSITION         132
 
-// Limit values (XM430-W210-T)
-#define LIMIT_X_MAX_VELOCITY            240
+// Limit values (XL430-W250)
+#define LIMIT_X_MAX_VELOCITY            265
 
 // Data Byte Length
 #define LEN_X_TORQUE_ENABLE             1
@@ -46,26 +46,27 @@
 #define PROTOCOL_VERSION                2.0     // Dynamixel protocol version 2.0
 
 #define DXL_LEFT_REAR_ID                1       // ID of left rear motor
-#define DXL_RIGHT_REAR_ID               2       // ID of right rear motor
-#define DXL_LEFT_FRONT_ID               3       // ID of left front motor
-#define DXL_RIGHT_FRONT_ID              4       // ID of right front motor
-#define BAUDRATE                        1000000 // baud rate of Dynamixel
+#define DXL_RIGHT_REAR_ID               4       // ID of right rear motor
+#define DXL_LEFT_FRONT_ID               2       // ID of left front motor
+#define DXL_RIGHT_FRONT_ID              3       // ID of right front motor
+#define BAUDRATE                        57600 // baud rate of Dynamixel
 #define DEVICENAME                      ""      // no need setting on OpenCR
 
 #define TORQUE_ENABLE                   1       // Value for enabling the torque
 #define TORQUE_DISABLE                  0       // Value for disabling the torque
 
-class Turtlebot3MotorDriver
+class AresMotorDriver
 {
  public:
-  Turtlebot3MotorDriver();
-  ~Turtlebot3MotorDriver();
+  AresMotorDriver();
+  ~AresMotorDriver();
   bool init(void);
   void closeDynamixel(void);
   bool setTorque(uint8_t id, bool onoff);
   bool setProfileAcceleration(uint8_t id, uint32_t value);
   bool setProfileVelocity(uint8_t id, uint32_t value);
   bool controlMotor(int64_t left_rear_wheel_value, int64_t right_rear_wheel_value, int64_t left_front_wheel_value, int64_t right_front_wheel_value);
+  bool readEncoder(int32_t &left_rear_value, int32_t &right_rear_value, int32_t &left_front_value, int32_t &right_front_value);
 
  private:
   uint32_t baudrate_;
@@ -80,4 +81,4 @@ class Turtlebot3MotorDriver
   dynamixel::GroupSyncRead *groupSyncReadEncoder_;
 };
 
-#endif // TURTLEBOT3_ARES_MOTOR_DRIVER_H_
+#endif // ARES_MOTOR_DRIVER_H_

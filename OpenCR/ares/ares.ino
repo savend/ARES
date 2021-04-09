@@ -44,6 +44,12 @@ void setup()
   nh.advertise(joint_states_pub);
   nh.advertise(battery_state_pub);
   nh.advertise(mag_pub);
+  nh.advertise(ambient_temp_pub);
+  nh.advertise(object_temp_pub);
+  nh.advertise(o2_concentration_pub);
+  nh.advertise(environment_temp_pub);
+  nh.advertise(environment_humidity_pub);
+  nh.advertise(environment_pressure_pub);
 
   tf_broadcaster.init(nh);
 
@@ -51,6 +57,28 @@ void setup()
 
   // Setting for IMU
   sensors.init();
+  
+  //setup for the sensors
+  ir_temp_sensor.begin();
+  
+  char log_msg[100];
+  
+  if (!o2_sensor.begin(O2_SENSOR_I2C_ADDRESS))
+	{
+		sprintf(log_msg, "O2-sensor I2C connection failled !");
+		nh.loginfo(log_msg);
+	}
+	
+  if (!env_sensor.begin())
+	{
+		sprintf(log_msg, "Could not find a valid BME680 environment sensor, check wiring!");
+		nh.loginfo(log_msg);
+	}
+  env_sensor.setTemperatureOversampling(BME680_OS_8X);
+  env_sensor.setHumidityOversampling(BME680_OS_2X);
+  env_sensor.setPressureOversampling(BME680_OS_4X);
+  env_sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
+  env_sensor.setGasHeater(320, 150); // 320*C for 150 ms
 
   // Init diagnosis
   diagnosis.init();
@@ -351,6 +379,49 @@ void publishDriveInformation(void)
   joint_states.header.stamp = stamp_now;
   joint_states_pub.publish(&joint_states);
 }
+
+/*******************************************************************************
+* Publish the IR_temperature_mesurement (ambient_temerature, object_temperature) std_msgs
+*******************************************************************************/
+void publishIRtempMesurement(void)
+{
+	amb_temp_msg.data = ir_temp_sensor.GetAmbientTemp_Celsius();
+    ambient_temp_pub.publish(&amb_temp_msg);		
+	
+	obj_temp_msg.data = ir_temp_sensor.GetObjectTemp_Celsius();
+    object_temp_pub.publish(&obj_temp_msg);
+}
+
+/*******************************************************************************
+* Publish the O2_volume_mesurement std_msgs
+*******************************************************************************/
+void publishO2Mesurement(void)
+{
+	o2_msg.data = o2_sensor.ReadOxygenData(COLLECT_NUMBER_AVG_O2);
+	o2_concentration_pub.publish(&o2_msg);
+}
+
+/*******************************************************************************
+* Publish the Environment_parameters_mesurement (temperature, pressure, humidity) std_msgs
+*******************************************************************************/
+void publishEnvParametersMesurement(void)// no error detection regarding env_sensor.performReading yet !!!
+{
+	if (!env_sensor.performReading())
+	{
+		char log_msg[50];
+		sprintf(log_msg, "Could not perform reading environment sensor");
+		nh.loginfo(log_msg);
+	}
+	env_temp_msg.data = env_sensor.temperature;
+	environment_temp_pub.publish(&env_temp_msg);
+	
+	env_pres_msg.data = (env_sensor.pressure / 100.0);
+	environment_pressure_pub.publish(&env_pres_msg);
+	
+	env_hum_msg.data = env_sensor.humidity;
+	environment_humidity_pub.publish(&env_hum_msg);
+}
+
 
 /*******************************************************************************
 * Update TF Prefix

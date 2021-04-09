@@ -26,6 +26,8 @@
 #include <std_msgs/Bool.h>
 #include <std_msgs/Empty.h>
 #include <std_msgs/Int32.h>
+#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Vector3.h>
 #include <tf/tf.h>
@@ -48,6 +50,18 @@
 #include "ares_controller.h"
 #include "ares_diagnosis.h"
 
+//*******libraries included for the sensors*****
+#include <Wire.h>
+#include "sensors/IR_Thermometer_Sensor_MLX90614.h"
+#include "sensors/DFRobot_OxygenSensor.h"
+#include "sensors/Adafruit_Sensor.h"
+#include "sensors/Adafruit_BME680.h"
+
+
+//*****sensor definitions*****
+#define COLLECT_NUMBER_AVG_O2                  10        // number of values collected/read to calculate an average value. Range is 1-100.
+#define O2_SENSOR_I2C_ADDRESS           ADDRESS_3 // ADDRESS_3 is the I2C default address (slave device) : ADDRESS_3 = 0x73
+//****************************
 
 #define WHEEL_RADIUS                    0.075     // meter
 #define WHEEL_SEPARATION                0.16      // meter (BURGER => 0.16, WAFFLE => 0.287)
@@ -139,6 +153,10 @@ void publishSensorStateMsg(void);
 void publishVersionInfoMsg(void);
 void publishBatteryStateMsg(void);
 void publishDriveInformation(void);
+
+void publishIRtempMesurement(void);
+void publishO2Mesurement(void);
+void publishEnvParametersMesurement(void);
 
 ros::Time rosNow(void);
 
@@ -233,6 +251,28 @@ ros::Publisher battery_state_pub("battery_state", &battery_state_msg);
 sensor_msgs::MagneticField mag_msg;
 ros::Publisher mag_pub("magnetic_field", &mag_msg);
 
+// BME680 environment sensor
+std_msgs::Float32 env_temp_msg;
+ros::Publisher environment_temp_pub ("env_temp",&env_temp_msg);
+
+std_msgs::Int32 env_pres_msg;
+ros::Publisher environment_pressure_pub ("env_pres",&env_pres_msg);
+
+std_msgs::Float32 env_hum_msg;
+ros::Publisher environment_humidity_pub ("env_hum",&env_hum_msg);
+
+// O2 Sensor
+std_msgs::Float32 o2_msg;
+ros::Publisher o2_concentration_pub ("o2_concentration",&o2_msg);
+
+// IR_Thermometer_Sensor_MLX90614
+std_msgs::Float64 amb_temp_msg;
+ros::Publisher ambient_temp_pub ("ambient_temp",&amb_temp_msg);
+
+std_msgs::Float64 obj_temp_msg;
+ros::Publisher object_temp_pub ("object_temp",&obj_temp_msg);
+
+
 /*******************************************************************************
 * Transform Broadcaster
 *******************************************************************************/
@@ -266,6 +306,12 @@ double  last_velocity[WHEEL_NUM]  = {0.0, 0.0, 0.0, 0.0};
 * Declaration for sensors
 *******************************************************************************/
 AresSensor sensors;
+
+/*****constructors**for**sensors***********************************************/
+IR_Thermometer_Sensor_MLX90614 ir_temp_sensor = IR_Thermometer_Sensor_MLX90614();
+DFRobot_OxygenSensor o2_sensor;
+Adafruit_BME680 env_sensor;                    
+/******************************************************************************/
 
 /*******************************************************************************
 * Declaration for controllers

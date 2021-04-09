@@ -52,10 +52,10 @@
 
 //*******libraries included for the sensors*****
 #include <Wire.h>
-#include "sensors/IR_Thermometer_Sensor_MLX90614.h"
-#include "sensors/DFRobot_OxygenSensor.h"
-#include "sensors/Adafruit_Sensor.h"
-#include "sensors/Adafruit_BME680.h"
+#include "IR_Thermometer_Sensor_MLX90614.h"
+#include "DFRobot_OxygenSensor.h"
+#include "Adafruit_Sensor.h"
+#include "Adafruit_BME680.h"
 
 
 //*****sensor definitions*****

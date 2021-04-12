@@ -280,7 +280,7 @@ namespace ares_msgs
     }
 
     const char * getType(){ return "ares_msgs/SensorState"; };
-    const char * getMD5(){ return "7250c1dc0b61c4190e78f528f599285f"; };
+    const char * getMD5(){ return "fa2b8131089150e0be73e10ec1305ca4"; };
 
   };
 

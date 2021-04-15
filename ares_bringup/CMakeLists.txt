@@ -157,9 +157,16 @@ include_directories(
 #   ${catkin_LIBRARIES}
 # )
 
+add_executable(ares_diagnostics src/ares_diagnostics.cpp)
+add_dependencies(ares_diagnostics ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(ares_diagnostics ${catkin_LIBRARIES})
+
 #############
 ## Install ##
 #############
+install(TARGETS ares_diagnostics
+  RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 # all install targets should use catkin DESTINATION variables
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html

@@ -1,5 +1,5 @@
 <launch>
-  <arg name="model" default="$(find ares_description)/urdf/01-ares.urdf.xacro"/>
+  <arg name="model" default="$(find ares_description)/urdf/ares.urdf.xacro"/>
   <arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
 
   <!-- these are the arguments you can pass this launch file, for example paused:=true -->

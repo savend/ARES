@@ -1,0 +1,30 @@
+<launch>
+	<arg name="model" default="$(find ares_description)/urdf/ares.urdf.xacro"/>
+  	<param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+	<arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
+	<arg name="set_lidar_frame_id" default="base_scan"/>
+
+	<include file="$(find rplidar_ros)/launch/rplidar.launch">
+    	<param name="frame_id" value="$(arg set_lidar_frame_id)"/>
+  	</include>
+
+
+	<node pkg="rosserial_python" type="serial_node.py" name="ares_core" output="screen">
+    	<param name="port" value="/dev/ttyACM0"/>
+    	<param name="baud" value="115200"/>
+  	</node>
+
+
+  	<node pkg="ares_bringup" type="ares_diagnostics" name="ares_diagnostics" output="screen"/>
+
+
+  	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
+
+
+  	<node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
+    	<param name="publish_frequency" type="double" value="50.0" />
+  	</node>
+
+
+
+</launch>

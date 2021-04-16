@@ -57,7 +57,6 @@
   <build_depend>std_msgs</build_depend>
   <build_depend>turtlebot3_msgs</build_depend>
   <build_depend>gazebo_ros</build_depend>
-  <build_depend>gazebo</build_depend>
   <build_depend>ares_description</build_depend>
   <build_export_depend>ares_msgs</build_export_depend>
   <build_export_depend>diagnostic_msgs</build_export_depend>
@@ -79,7 +78,6 @@
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>rosserial_python</exec_depend>
   <exec_depend>gazebo_ros</exec_depend>
-  <exec_depend>gazebo</exec_depend>
   <exec_depend>ares_description</exec_depend>
 
 

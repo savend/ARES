@@ -62,7 +62,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>	
 			</geometry>
-			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 			<material name="black"/>
 		</visual>
 		<collision>
@@ -81,8 +81,8 @@
 	<joint name="left_rear_wheel_joint" type="continuous">
 		<parent link="chassis"/>
 		<child link="left_rear_wheel_link"/>
-		<axis xyz="0 0 1"/>
-		<origin rpy="1.57075 0 0" xyz="-0.089 0.12862 0.01575"/>
+		<axis xyz="0 1 0"/>
+		<origin rpy="0 0 0" xyz="-0.089 0.12862 0.01575"/>
 	</joint>
 
 	<transmission name="left_rear_wheel_trans">
@@ -96,9 +96,12 @@
 	</transmission>
 
 	<gazebo reference="left_rear_wheel_link">
-		<mu1 value="200.0"/>
-		<mu2 value="100.0"/>
-
+		<mu1 value="0.8" />
+    	<mu2 value="0.8" />
+    	<kp value="1000000.0" />
+    	<kd value="1.0" />
+    	<maxVel value="0.0" />
+  		<minDepth value="0.001"/>
 		<material>Gazebo/Grey</material>
 	</gazebo>
 
@@ -109,7 +112,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>
 			</geometry>
-			<origin rpy="0 0 0" xyz="0 0 0"/>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 			<material name="black"/>
 		</visual>
 		<collision>
@@ -128,8 +131,8 @@
 	<joint name="left_front_wheel_joint" type="continuous">
 		<parent link="chassis"/>
 		<child link="left_front_wheel_link"/>
-		<axis xyz="0 0 1"/>
-		<origin rpy="1.57075 0 0" xyz="0.089 0.12862 0.01575"/>
+		<axis xyz="0 1 0"/>
+		<origin rpy="0 0 0" xyz="0.089 0.12862 0.01575"/>
 	</joint>
 
 	<transmission name="left_front_wheel_trans">
@@ -142,10 +145,13 @@
 		</joint>
 	</transmission>
 
-	<gazebo reference0="left_front_wheel_link">
-		<mu1 value="0.01"/>
-		<mu2 value="0.01"/>
-
+	<gazebo reference="left_front_wheel_link">
+		<mu1 value="0.8" />
+    	<mu2 value="0.8" />
+    	<kp value="1000000.0" />
+    	<kd value="1.0" />
+    	<maxVel value="0.0" />
+  		<minDepth value="0.001"/>
 		<material>Gazebo/Grey</material>
 	</gazebo>
 
@@ -175,7 +181,7 @@
 	<joint name="right_rear_wheel_joint" type="continuous">
 		<parent link="chassis"/>
 		<child link="right_rear_wheel_link"/>
-		<axis xyz="0 0 1"/>
+		<axis xyz="0 1 0"/>
 		<origin rpy="0 0 0" xyz="-0.089 -0.12862 0.01575"/>
 	</joint>
 
@@ -190,13 +196,12 @@
 	</transmission>
 
 	<gazebo reference="right_rear_wheel_link">
-		<mu1>0.1</mu1>
-    <mu2>0.1</mu2>
-    <kp>500000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+		<mu1 value="0.8" />
+    	<mu2 value="0.8" />
+    	<kp value="1000000.0" />
+    	<kd value="1.0" />
+    	<maxVel value="0.0" />
+  		<minDepth value="0.001"/>
 		<material>Gazebo/Grey</material>
 	</gazebo>
 
@@ -226,9 +231,8 @@
 	<joint name="right_front_wheel_joint" type="continuous">
 		<parent link="chassis"/>
 		<child link="right_front_wheel_link"/>
-		<axis xyz="0 0 1"/>
+		<axis xyz="0 1 0"/>
 		<origin rpy="0 0 0" xyz="0.089 -0.12862 0.01575"/>
-		<dynamics friction="10"/>
 	</joint>
 
 	<transmission name="right_front_wheel_trans">
@@ -242,13 +246,12 @@
 	</transmission>
 
 	<gazebo reference="right_front_wheel_link">
-		<mu1>10</mu1>
-    <mu2>10</mu2>
-    <kp>500000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <maxVel>0.1</maxVel>
-    <fdir1>1 0 0</fdir1>
+		<mu1 value="0.8" />
+    	<mu2 value="0.8" />
+    	<kp value="1000000.0" />
+    	<kd value="1.0" />
+    	<maxVel value="0.0" />
+  		<minDepth value="0.001"/>
 		<material>Gazebo/Grey</material>
 	</gazebo>
 
@@ -295,7 +298,7 @@
 
 	<link name="base_scan">
     <visual>
-      <origin xyz="0 0 0.0" rpy="0 0 0"/>
+      <origin xyz="0 0 0.0" rpy="1.57075 0 0"/>
       <geometry>
         <mesh filename="package://ares_description/meshes/lidar.stl" scale="0.001 0.001 0.001"/>
       </geometry>
@@ -321,8 +324,70 @@
   <joint name="scan_joint" type="fixed">
     <parent link="chassis"/>
     <child link="base_scan"/>
-    <origin xyz="0 0 0.093" rpy="1.57075 0 0"/>
+    <origin xyz="0 0 0.093" rpy="0 0 0"/>
   </joint>
+
+    <gazebo>
+    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <bodyName>imu_link</bodyName>
+      <frameName>imu_link</frameName>
+      <topicName>imu</topicName>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>0</updateRate>
+      <imu>
+        <noise>
+          <type>gaussian</type>
+          <rate>
+            <mean>0.0</mean>
+            <stddev>2e-4</stddev>
+            <bias_mean>0.0000075</bias_mean>
+            <bias_stddev>0.0000008</bias_stddev>
+          </rate>
+          <accel>
+            <mean>0.0</mean>
+            <stddev>1.7e-2</stddev>
+            <bias_mean>0.1</bias_mean>
+            <bias_stddev>0.001</bias_stddev>
+          </accel>
+        </noise>
+      </imu>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="base_scan">
+    <material>Gazebo/FlatBlack</material>
+    <sensor type="ray" name="lds_lfcd_sensor">
+      <pose>0 0 0 0 0 0</pose>
+      <visualize>false</visualize>
+      <update_rate>5</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>0.0</min_angle>
+            <max_angle>6.28319</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.120</min>
+          <max>3.5</max>
+          <resolution>0.015</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin name="gazebo_ros_lds_lfcd_controller" filename="libgazebo_ros_laser.so">
+        <topicName>scan</topicName>
+        <frameName>base_scan</frameName>
+      </plugin>
+    </sensor>
+  </gazebo>
 
 
   	<gazebo>

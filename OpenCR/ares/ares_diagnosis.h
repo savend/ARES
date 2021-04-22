@@ -27,6 +27,7 @@
 #define LED_LOW_BATTERY                  2
 #define LED_ROS_CONNECT                  3
 #define LED_WORKING_CHECK                13
+#define BATTERY_LED_PIN   				 6
 
 #define BATTERY_POWER_OFF                0
 #define BATTERY_POWER_STARTUP            1
@@ -53,9 +54,9 @@ class AresDiagnosis
 
   void setPowerOn(void);
   void setPowerOff(void);
-
+    
   uint8_t updateVoltageCheck(bool check_setup);
-
+  
   uint8_t getButtonPress(uint16_t time_to_press);  
 
  private:

@@ -73,10 +73,10 @@
 bool emergency_state; 									// warning flag rised when emergency button was pressed
 //****************************************************
 
-#define WHEEL_RADIUS                    0.075     // meter
-#define WHEEL_SEPARATION                0.16      // meter (BURGER => 0.16, WAFFLE => 0.287)
-#define TURNING_RADIUS                  0.080     //****** // meter (BURGER : 0.080, WAFFLE : 0.1435)
-#define ROBOT_RADIUS                    0.105     //****** // meter (BURGER : 0.105, WAFFLE : 0.220)
+#define WHEEL_RADIUS                    0.06     // meter
+#define WHEEL_SEPARATION                0.25      // meter (BURGER => 0.16, WAFFLE => 0.287)
+#define TURNING_RADIUS                  0.306     //****** // meter (BURGER : 0.080, WAFFLE : 0.1435)
+#define ROBOT_RADIUS                    0.430     //****** // meter (BURGER : 0.105, WAFFLE : 0.220)
 // #define ROBOT_LENGTH                    0.165     // meter
 
 #define WHEEL_POS_FROM_CENTER_X_1       -0.100    // meter
@@ -97,7 +97,7 @@ bool emergency_state; 									// warning flag rised when emergency button was p
 
 #define CONTROL_PERIOD                  8000
 
-#define MAX_LINEAR_VELOCITY             0.22   // m/s
+#define MAX_LINEAR_VELOCITY             0.376   // m/s
 #define MAX_ANGULAR_VELOCITY            2.84   // rad/s
 //#define MAX_LINEAR_VELOCITY             (WHEEL_RADIUS * 2 * 3.14159265359 * 61 / 60) // m/s  (BURGER : 61[rpm], WAFFLE : 77[rpm])
 //#define MAX_ANGULAR_VELOCITY            (MAX_LINEAR_VELOCITY / TURNING_RADIUS)       // rad/s

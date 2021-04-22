@@ -110,11 +110,21 @@ void AresDiagnosis::updateRxTxLed(void)
 void AresDiagnosis::setPowerOn(void)
 {
   digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
+  
+  digitalWrite(BATTERY_LED_PIN, HIGH);
 }
 
 void AresDiagnosis::setPowerOff(void)
 {
+  static uint32_t previous_time_led = millis();
+  
   digitalWrite(BDPIN_DXL_PWR_EN, LOW);
+  
+  if(millis() - previous_time_led  > 1000)
+  {
+	digitalWrite(BATTERY_LED_PIN, !digitalRead(BATTERY_LED_PIN));
+	previous_time_led = millis();
+  }
 }
 
 uint8_t AresDiagnosis::updateVoltageCheck(bool check_setup)

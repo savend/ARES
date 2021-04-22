@@ -37,6 +37,7 @@
 			<geometry>
 				<box size="${chassisLength} ${chassisWidth} ${chassisHeight}"/>
 			</geometry>
+			<origin rpy="0 0 0" xyz="0 0 ${chassisHeight/2}"/>
 		</collision>
 		<inertial>
 			<mass value="5"/>
@@ -69,6 +70,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>	
 			</geometry>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 		</collision>
 		<inertial>
 			<mass value="0.150"/>
@@ -119,6 +121,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>	
 			</geometry>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 		</collision>
 		<inertial>
 			<mass value="0.150"/>
@@ -169,6 +172,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>	
 			</geometry>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 		</collision>
 		<inertial>
 			<mass value="0.150"/>
@@ -219,6 +223,7 @@
 			<geometry>
 				<cylinder length="${wheelWidth}" radius="${wheelRadius}"/>	
 			</geometry>
+			<origin rpy="1.57075 0 0" xyz="0 0 0"/>
 		</collision>
 		<inertial>
 			<mass value="0.150"/>
@@ -306,7 +311,7 @@
     </visual>
 
     <collision>
-      <origin xyz="0.015 0 -0.0065" rpy="0 0 0"/>
+      <origin xyz="0 0 ${0.0315/2}" rpy="0 0 0"/>
       <geometry>
         <cylinder length="0.0315" radius="0.055"/>
       </geometry>
@@ -324,7 +329,7 @@
   <joint name="scan_joint" type="fixed">
     <parent link="chassis"/>
     <child link="base_scan"/>
-    <origin xyz="0 0 0.093" rpy="0 0 0"/>
+    <origin xyz="0 0 0.1" rpy="0 0 0"/>
   </joint>
 
     <gazebo>

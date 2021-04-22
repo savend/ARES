@@ -60,8 +60,18 @@
 
 //*****sensor definitions*****
 #define COLLECT_NUMBER_AVG_O2                  10        // number of values collected/read to calculate an average value. Range is 1-100.
-#define O2_SENSOR_I2C_ADDRESS           ADDRESS_3 // ADDRESS_3 is the I2C default address (slave device) : ADDRESS_3 = 0x73
+#define O2_SENSOR_I2C_ADDRESS           ADDRESS_3        // ADDRESS_3 is the I2C default address (slave device) : ADDRESS_3 = 0x73
 //****************************
+
+//*******Definition of digital pins on the OpenCR*****
+#define RELAIS_PIN                        8
+#define EMERGENCY_SWITCH_INTERRUPT_PIN    4
+//****************************************************
+
+
+//*******Definition of global variables**************
+bool emergency_state; 									// warning flag rised when emergency button was pressed
+//****************************************************
 
 #define WHEEL_RADIUS                    0.075     // meter
 #define WHEEL_SEPARATION                0.16      // meter (BURGER => 0.16, WAFFLE => 0.287)
@@ -144,6 +154,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg);
 void soundCallback(const ares_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
+void headlightsCallback(const std_msgs::Bool& headlights_status_msg);
 
 // Function prototypes
 void publishCmdVelFromRC100Msg(void);
@@ -157,6 +168,8 @@ void publishDriveInformation(void);
 void publishIRtempMesurement(void);
 void publishO2Mesurement(void);
 void publishEnvParametersMesurement(void);
+
+void emergencyCallback (void); // get emergencyButton pressed, publish flag, and reinitialize the motors
 
 ros::Time rosNow(void);
 
@@ -211,6 +224,8 @@ ros::Subscriber<ares_msgs::Sound> sound_sub("sound", soundCallback);
 ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallback);
 
 ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
+
+ros::Subscriber<std_msgs::Bool> headlights_status_sub("headlights_status", headlightsCallback);
 
 /*******************************************************************************
 * Publisher
@@ -271,6 +286,10 @@ ros::Publisher ambient_temp_pub ("ambient_temp",&amb_temp_msg);
 
 std_msgs::Float64 obj_temp_msg;
 ros::Publisher object_temp_pub ("object_temp",&obj_temp_msg);
+
+// Warning flag of the emergency button
+std_msgs::Bool emergency_state_msg;
+ros::Publisher emergency_state_pub ("emergency_button_state",&emergency_state_msg);
 
 
 /*******************************************************************************

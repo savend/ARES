@@ -507,11 +507,11 @@ void updateTFPrefix(bool isConnected)
       if (!strcmp(get_tf_prefix, ""))
       {
         sprintf(odom_header_frame_id, "odom");
-        sprintf(odom_child_frame_id, "base_footprint");  
+        sprintf(odom_child_frame_id, "base_link");  
 
         sprintf(imu_frame_id, "imu_link");
         sprintf(mag_frame_id, "mag_link");
-        sprintf(joint_state_header_frame_id, "base_link");
+        sprintf(joint_state_header_frame_id, "chassis");
       }
       else
       {
@@ -523,11 +523,11 @@ void updateTFPrefix(bool isConnected)
         strcpy(joint_state_header_frame_id, get_tf_prefix);
 
         strcat(odom_header_frame_id, "/odom");
-        strcat(odom_child_frame_id, "/base_footprint");
+        strcat(odom_child_frame_id, "/base_link");
 
         strcat(imu_frame_id, "/imu_link");
         strcat(mag_frame_id, "/mag_link");
-        strcat(joint_state_header_frame_id, "/base_link");
+        strcat(joint_state_header_frame_id, "/chassis");
       }
 
       sprintf(log_msg, "Setup TF on Odometry [%s]", odom_header_frame_id);

@@ -14,7 +14,7 @@
   	</node>
 
 
-  	<node pkg="ares_bringup" type="ares_diagnostics" name="ares_diagnostics" output="screen"/>
+  <node pkg="ares_bringup" type="ares_diagnostics" name="ares_diagnostics" output="screen"/>
 
 
 <!--   	

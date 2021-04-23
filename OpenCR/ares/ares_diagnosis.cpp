@@ -46,7 +46,7 @@ void AresDiagnosis::showLedStatus(bool isConnected)
     digitalWrite(LED_WORKING_CHECK, !digitalRead(LED_WORKING_CHECK));
   }
 
-  if (getPowerInVoltage() < 8.5)
+  if (getPowerInVoltage() < 11.0)
   {
     setLedOn(LED_LOW_BATTERY);
   }
@@ -110,11 +110,21 @@ void AresDiagnosis::updateRxTxLed(void)
 void AresDiagnosis::setPowerOn(void)
 {
   digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
+  
+  digitalWrite(BATTERY_LED_PIN, HIGH);
 }
 
 void AresDiagnosis::setPowerOff(void)
 {
+  static uint32_t previous_time_led = millis();
+  
   digitalWrite(BDPIN_DXL_PWR_EN, LOW);
+  
+  if(millis() - previous_time_led  > 1000)
+  {
+	digitalWrite(BATTERY_LED_PIN, !digitalRead(BATTERY_LED_PIN));
+	previous_time_led = millis();
+  }
 }
 
 uint8_t AresDiagnosis::updateVoltageCheck(bool check_setup)
@@ -136,8 +146,8 @@ uint8_t AresDiagnosis::updateVoltageCheck(bool check_setup)
   static uint32_t process_time[8] = {0,};
   static float    vol_value_tbl[10] = {0,};
 
-  float voltage_ref       = 9.0 + 0.0;
-  float voltage_ref_warn  = 8.5 + 0.0;
+  float voltage_ref       = 12.0 + 0.0;
+  float voltage_ref_warn  = 11.0 + 0.0;
 
 
   if (startup == false)

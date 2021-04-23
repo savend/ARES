@@ -35,6 +35,8 @@ void setup()
   nh.subscribe(sound_sub);
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
+  nh.subscribe(headlights_status_sub);
+  
 
   nh.advertise(sensor_state_pub);  
   nh.advertise(version_info_pub);
@@ -80,6 +82,16 @@ void setup()
   env_sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
   env_sensor.setGasHeater(320, 150); // 320*C for 150 ms
 
+  // Digital PinMode declaration on the OpenCR  
+  pinMode(RELAIS_PIN, OUTPUT);
+  digitalWrite(RELAIS_PIN, LOW);
+  
+  pinMode(BATTERY_LED_PIN, OUTPUT);
+  
+  pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
+  attachInterrupt(2, emergencyCallback, FALLING);
+  emergency_state = 0;
+    
   // Init diagnosis
   diagnosis.init();
 
@@ -94,7 +106,7 @@ void setup()
   prev_update_time = millis();
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
-
+ 
   setup_end = true;
 }
 
@@ -254,6 +266,20 @@ void resetCallback(const std_msgs::Empty& reset_msg)
 }
 
 /*******************************************************************************
+* Callback function for headlights 
+*******************************************************************************/
+void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
+{
+  bool headlights_status = headlights_status_msg.data;
+
+  if (headlights_status == true)
+  {
+    digitalWrite(RELAIS_PIN, HIGH);
+  }
+  else digitalWrite(RELAIS_PIN, LOW);
+}
+
+/*******************************************************************************
 * Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
 *******************************************************************************/
 void publishCmdVelFromRC100Msg(void)
@@ -404,7 +430,7 @@ void publishO2Mesurement(void)
 /*******************************************************************************
 * Publish the Environment_parameters_mesurement (temperature, pressure, humidity) std_msgs
 *******************************************************************************/
-void publishEnvParametersMesurement(void)// no error detection regarding env_sensor.performReading yet !!!
+void publishEnvParametersMesurement(void)
 {
 	if (!env_sensor.performReading())
 	{
@@ -420,6 +446,19 @@ void publishEnvParametersMesurement(void)// no error detection regarding env_sen
 	
 	env_hum_msg.data = env_sensor.humidity;
 	environment_humidity_pub.publish(&env_hum_msg);
+}
+
+/*******************************************************************************
+* Get if emergencyButton pressed, Publish warning flag, and Reinitialize the motors
+*******************************************************************************/
+void emergencyCallback (void)
+{
+  motor_driver.init(); // reinitialize the motors after an emergency stop 
+  
+  emergency_state = 1; // warning: emergency button was pressed !
+  
+  emergency_state_msg.data = emergency_state;
+  emergency_state_pub.publish(&emergency_state_msg); //publishing the warning 
 }
 
 

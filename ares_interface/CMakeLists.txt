@@ -105,7 +105,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES ares_interface
-#  CATKIN_DEPENDS cv2 rospy sensor_msgs std_msgs
+#  CATKIN_DEPENDS rospy sensor_msgs std_msgs
 #  DEPENDS system_lib
 )
 
@@ -160,7 +160,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-    src/ares_interface.py
+   src/ares_interface.py
    DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

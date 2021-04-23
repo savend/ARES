@@ -52,6 +52,7 @@ void setup()
   nh.advertise(environment_temp_pub);
   nh.advertise(environment_humidity_pub);
   nh.advertise(environment_pressure_pub);
+  nh.advertise(emergency_state_pub);
 
   tf_broadcaster.init(nh);
 
@@ -84,13 +85,14 @@ void setup()
 
   // Digital PinMode declaration on the OpenCR  
   pinMode(RELAIS_PIN, OUTPUT);
-  digitalWrite(RELAIS_PIN, LOW);
+  digitalWrite(RELAIS_PIN, HIGH);
   
   pinMode(BATTERY_LED_PIN, OUTPUT);
+  digitalWrite(BATTERY_LED_PIN, HIGH);
   
   pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
-  attachInterrupt(2, emergencyCallback, FALLING);
-  emergency_state = 0;
+  attachInterrupt(2, emergencyCallback, CHANGE);   // when emergency button is pressed (voltage is falling on the Pin) or released (voltage rising back )
+  emergency_state = false;
     
   // Init diagnosis
   diagnosis.init();
@@ -132,11 +134,9 @@ void loop()
       controlAres();
     } 
     else {
-            char log_msg[50];
+            
 
 
-  sprintf(log_msg, "Goal velocity to control Ares");
-  nh.loginfo(log_msg);
       controlAres();
     }
     tTime[0] = t;
@@ -153,6 +153,8 @@ void loop()
     publishSensorStateMsg();
     publishBatteryStateMsg();
     publishDriveInformation();
+    publishO2Mesurement();
+    publishIRtempMesurement();
     tTime[2] = t;
   }
 
@@ -194,6 +196,22 @@ void loop()
   // TODO
   // Update sonar data
   // sensors.updateSonar(t);
+
+  int motor_error_1=0;
+  int motor_error_2=0;
+  int motor_error_3=0;
+  int motor_error_4=0;
+  char log_msg[50];
+  
+
+  motor_driver.readError(motor_error_1, motor_error_2, motor_error_3, motor_error_4);
+  if(motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
+  {
+  sprintf(log_msg,  "motor 1 : %d, motor 2 : %d, motor 3 : %d, motor 4 : %d", motor_error_1, motor_error_2, motor_error_3, motor_error_4);
+  //char log_msg[50];
+  //sprintf(log_msg, "Goal velocity to control Ares");
+  nh.loginfo(log_msg);
+}
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali(nh.connected());
@@ -274,9 +292,9 @@ void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
 
   if (headlights_status == true)
   {
-    digitalWrite(RELAIS_PIN, HIGH);
+    digitalWrite(RELAIS_PIN, LOW);
   }
-  else digitalWrite(RELAIS_PIN, LOW);
+  else digitalWrite(RELAIS_PIN, HIGH);
 }
 
 /*******************************************************************************
@@ -364,9 +382,9 @@ void publishVersionInfoMsg(void)
 void publishBatteryStateMsg(void)
 {
   battery_state_msg.header.stamp = rosNow();
-  battery_state_msg.design_capacity = 1.8f; //Ah
+  battery_state_msg.design_capacity = 4.0f; //Ah
   battery_state_msg.voltage = sensors.checkVoltage();
-  battery_state_msg.percentage = (float)(battery_state_msg.voltage / 9.0f);
+  battery_state_msg.percentage = (float)(battery_state_msg.voltage / 11.1f);
 
   if (battery_state == 0)
     battery_state_msg.present = false;
@@ -452,13 +470,23 @@ void publishEnvParametersMesurement(void)
 * Get if emergencyButton pressed, Publish warning flag, and Reinitialize the motors
 *******************************************************************************/
 void emergencyCallback (void)
-{
-  motor_driver.init(); // reinitialize the motors after an emergency stop 
-  
-  emergency_state = 1; // warning: emergency button was pressed !
-  
+{  
+  if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+  {
+    emergency_state = true; // warning: emergency button was pressed !
+  }
+  else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
+  {
+//    if(emergency_state == true)
+//    {
+//      //motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
+//      //motor_driver.init();
+//    }
+    emergency_state = false;
+  }
+
   emergency_state_msg.data = emergency_state;
-  emergency_state_pub.publish(&emergency_state_msg); //publishing the warning 
+  emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
 }
 
 

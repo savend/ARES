@@ -151,7 +151,80 @@ bool AresMotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_
   left_front_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
   right_front_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
 
+
+
   groupSyncReadEncoder_->clearParam();
+  return true;
+}
+
+  bool AresMotorDriver::readError(int &left_rear_value, int &right_rear_value, int &left_front_value, int &right_front_value)
+{
+  int dxl_comm_result = COMM_TX_FAIL;              // Communication result
+  bool dxl_addparam_result = false;                // addParam result
+  bool dxl_getdata_result = false;                 // GetParam result
+
+  // Set parameter
+  dxl_addparam_result = groupSyncReadEncoder_->addParam(left_rear_wheel_id_);
+  if (dxl_addparam_result != true)
+    return false;
+
+  dxl_addparam_result = groupSyncReadEncoder_->addParam(right_rear_wheel_id_);
+  if (dxl_addparam_result != true)
+    return false;
+  dxl_addparam_result = groupSyncReadEncoder_->addParam(left_front_wheel_id_);
+  if (dxl_addparam_result != true)
+    return false;
+
+  dxl_addparam_result = groupSyncReadEncoder_->addParam(right_front_wheel_id_);
+  if (dxl_addparam_result != true)
+    return false;
+
+
+  // Syncread present position
+  dxl_comm_result = groupSyncReadEncoder_->txRxPacket();
+  if (dxl_comm_result != COMM_SUCCESS)
+    Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
+
+  // Check if groupSyncRead data of Dynamixels are available
+  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(left_rear_wheel_id_, 70, 1);
+  if (dxl_getdata_result != true)
+    return false;
+
+  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(right_rear_wheel_id_, 70, 1);
+  if (dxl_getdata_result != true)
+    return false;
+  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(left_front_wheel_id_, 70, 1);
+  if (dxl_getdata_result != true)
+    return false;
+
+  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(right_front_wheel_id_, 70, 1);
+  if (dxl_getdata_result != true)
+    return false;
+
+  // Get data
+  left_rear_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  70, 1);
+  right_rear_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, 70, 1);
+  left_front_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  70, 1);
+  right_front_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, 70, 1);
+
+
+  groupSyncReadEncoder_->clearParam();
+  return true;
+}
+
+  bool AresMotorDriver::aresReboot(void)
+{
+  int dxl_comm_result = COMM_TX_FAIL;             // Communication result
+
+  uint8_t dxl_error = 0;                          // Dynamixel error
+
+  dxl_comm_result = packetHandler_->reboot(portHandler_, left_rear_wheel_id_, &dxl_error);
+  dxl_comm_result = packetHandler_->reboot(portHandler_, left_front_wheel_id_, &dxl_error);
+  dxl_comm_result = packetHandler_->reboot(portHandler_, right_rear_wheel_id_, &dxl_error);
+  dxl_comm_result = packetHandler_->reboot(portHandler_, right_front_wheel_id_, &dxl_error);
+
+  //init();
+  
   return true;
 }
 

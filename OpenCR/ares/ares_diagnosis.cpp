@@ -110,7 +110,6 @@ void AresDiagnosis::updateRxTxLed(void)
 void AresDiagnosis::setPowerOn(void)
 {
   digitalWrite(BDPIN_DXL_PWR_EN, HIGH);
-  
   digitalWrite(BATTERY_LED_PIN, HIGH);
 }
 
@@ -147,7 +146,7 @@ uint8_t AresDiagnosis::updateVoltageCheck(bool check_setup)
   static float    vol_value_tbl[10] = {0,};
 
   float voltage_ref       = 12.0 + 0.0;
-  float voltage_ref_warn  = 11.0 + 0.0;
+  float voltage_ref_warn  = 9.0 + 0.0;
 
 
   if (startup == false)

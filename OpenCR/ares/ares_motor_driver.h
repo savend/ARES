@@ -67,6 +67,8 @@ class AresMotorDriver
   bool setProfileVelocity(uint8_t id, uint32_t value);
   bool controlMotor(int64_t left_rear_wheel_value, int64_t right_rear_wheel_value, int64_t left_front_wheel_value, int64_t right_front_wheel_value);
   bool readEncoder(int32_t &left_rear_value, int32_t &right_rear_value, int32_t &left_front_value, int32_t &right_front_value);
+  bool readError(int &left_rear_value, int &right_rear_value, int &left_front_value, int &right_front_value);
+  bool aresReboot(void);
 
  private:
   uint32_t baudrate_;

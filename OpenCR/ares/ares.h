@@ -169,7 +169,8 @@ void publishIRtempMesurement(void);
 void publishO2Mesurement(void);
 void publishEnvParametersMesurement(void);
 
-void emergencyCallback (void); // get emergencyButton pressed, publish flag, and reinitialize the motors
+void emergencyCallback (void); // get emergencyButton pressed, and publish emergency warning flag
+void reinitMotorsCallback (void); // get emergencyButton released, reinitialize the motors and reset emergency_state to 0
 
 ros::Time rosNow(void);
 

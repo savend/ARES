@@ -1,18 +1,21 @@
-#ARES
-##Advanced Robotic Exploration System
+# ARES
+## Advanced Robotic Exploration System
+![](https://github.com/savend/ARES/ares_interface/src/ARESLOGO_Black.jpg)
 
 Firefighter robot, for smok-filled room exploration.
 
 Robot based on NVIDIA Jetson Nano, Robotis OpenCR, Dynamixel Motors, IntelRealSense Camera and RPLidar A1
 
-###Installing OpenCR and Dynamixel Motors
+![](https://github.com/savend/ARES/ares_robot.jpeg)
+
+### Installing OpenCR and Dynamixel Motors
 
 To televerse ARES OpenCR programm, the Arduino IDE, and the ROBOTIS OpenCR library is needed. Please follow this steps :
 * [For Windows](https://emanual.robotis.com/docs/en/parts/controller/opencr10/#install-on-windows)
 * [For Linux ](https://emanual.robotis.com/docs/en/parts/controller/opencr10/#arduino-ide)
 * [For Mac](https://emanual.robotis.com/docs/en/parts/controller/opencr10/#install-on-mac)
 
-####Define Motor ID (Dynamixel XL430-W250)
+#### Define Motor ID (Dynamixel XL430-W250)
 Connect one Motor to the OpenCR Board.
 
 In the Arduino IDE open the example : File > Examples > OpenCR > DynamixelWorbench > a_Model_Scan. Execute code and open the Serial Monitor. Find the Baudrate and the ID of your connected motor. 
@@ -22,7 +25,7 @@ In the code modify the IDs to have only one ID per Motor. Compile and open Seria
 
 Repeat the last 3 steps with the four Dynamixel motors. Connect then all four mtoros and recharge the Model_scan code. Open the Serial Monitor and make sure that 4 motors have been detected with 4 different IDs.
 
-####Upload Ares OpenCR code
+#### Upload Ares OpenCR code
 
 On your workspace directory :
 ```sh
@@ -33,7 +36,7 @@ You can now open the ares.ino file in the directory ARES > OpenCR > ares with th
 
 Test the code and motors with the two [SW1 and SW2 Buttons](https://emanual.robotis.com/docs/en/parts/controller/opencr10/#push-switch) (ARES should go forward or turn).
 
-###Installing the NVIDIA Jetson Nano
+### Installing the NVIDIA Jetson Nano
 
 * Install a Ubuntu or equivalent distribution on the NVIDA Jetson that is compatibel with ROS-Noetic.
 * Please follow [this installation Tutorial to install ROS-Noetic on the Jetson](http://wiki.ros.org/noetic/Installation).
@@ -58,7 +61,7 @@ echo "export ROS_HOSTNAME = IP_OF_ARES_JETSON" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-###Install ARES on remote Laptop
+### Install ARES on remote Laptop
 
 * Install a Ubuntu or equivalent distribution on the on your Laptop that is compatibel with ROS-Noetic.
 * Please follow [this installation Tutorial to install ROS-Noetic on the Jetson](http://wiki.ros.org/noetic/Installation).
@@ -84,7 +87,7 @@ echo "export ROS_HOSTNAME = IP_OF_REMOTE_PC" >> ~/.bashrc
 source ~/.bashrc
 ```
 
-###Start ARES
+### Start ARES
 
 Make sure that the whole robot is working, that motors are connected, the OpenCR have enough power and is connected to the Jetson.
 

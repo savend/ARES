@@ -1,12 +1,18 @@
 # ARES
 ## Advanced Robotic Exploration System
-![](https://github.com/savend/ARES/ares_interface/src/ARESLOGO_Black.jpg)
+
+<p align="center">
+  <img height="250" src="ares_interface/src/ARESLOGO_Black.jpng" />
+</p>
+
 
 Firefighter robot, for smok-filled room exploration.
 
 Robot based on NVIDIA Jetson Nano, Robotis OpenCR, Dynamixel Motors, IntelRealSense Camera and RPLidar A1
 
-![](https://github.com/savend/ARES/ares_robot.jpeg)
+<p align="center">
+  <img widtht="1280" src="ares_robot.jpeg" />
+</p>
 
 ### Installing OpenCR and Dynamixel Motors
 

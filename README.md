@@ -2,7 +2,7 @@
 ## Advanced Robotic Exploration System
 
 <p align="center">
-  <img height="250" src="ares_interface/src/ARESLOGO_Black.jpg" />
+  <img height="150" src="ares_interface/src/ARESLOGO_Black.jpg" />
 </p>
 
 

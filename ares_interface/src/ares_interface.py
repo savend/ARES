@@ -7,8 +7,9 @@ from sensor_msgs.msg import BatteryState,Image
 
 import cv2
 import numpy as np
-import pyrealsense2
-from realsense_depth import *
+from cv_bridge import CvBridge
+#import pyrealsense2
+#from realsense_depth import *
 from typing import Tuple
 
 # Information for DIstanceMesureing
@@ -55,11 +56,13 @@ class ImageProcess:
         self.objTemp_data = 0
         self.ambientTemp_data = 0
         self.battery_data = 0
-        self.image = DepthCamera()
         self.casePath = "haarcascade.xml"
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
+        self.img
+        self.depth_img
+        self.bridge = CvBridge()
 
-        self.img_pub= rospy.Publisher("/image", Image,queue_size=10)
+        self.img_pub= rospy.Publisher("/image", Image, queue_size=10)
 
         self.o2_sub = rospy.Subscriber("o2_concentration", Float32,self.o2_sensor_callback)
         self.battery_sub = rospy.Subscriber("battery_state", BatteryState, self.batteryState_callback)
@@ -69,14 +72,16 @@ class ImageProcess:
         self.ambient_temp_sub = rospy.Subscriber("ambient_temp", Float64, self.ambient_temp_sensor_callback)
         self.obj_temp_sub = rospy.Subscriber("object_temp", Float64, self.obj_temp_sensor_callback)
         self.emergency_sub = rospy.Subscriber("emergency_button_state", Bool, self.emergency_button_state_callback)
+        self.color_frame_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.camera_color_callback) #DepthCamera()
+        self.depth_frame_sub = rospy.Subscriber("/camera/depth/image_raw", Image, self.camera_depth_callback) #DepthCamera()
 
 
 
     def o2_sensor_callback(self,o2_msg):
-        o2_data=o2_msg.data
+        self.o2_data=o2_msg.data
 
     def batteryState_callback(self,battery_msg):
-        battery_data = battery_msg.data
+        self.battery_data = battery_msg.data
 
     #def env_temp_sensor_callback(self,envTemp_msg):
     #   env_Temp_data=envTemp_msg.data
@@ -88,13 +93,20 @@ class ImageProcess:
     #    envHumid_data=envHumid_msg.data
 
     def ambient_temp_sensor_callback(self,ambientTemp_msg):
-        ambientTemp_data=ambientTemp_msg.data
+        self.ambientTemp_data=ambientTemp_msg.data
 
     def obj_temp_sensor_callback(self,objTemp_msg):
-        objTemp_data=objTemp_msg.data
+        self.objTemp_data=objTemp_msg.data
 
     def emergency_button_state_callback(self,emergencStop_msg):
-        emergencStop_data=emergencStop_msg.data
+        self.emergencStop_data=emergencStop_msg.data
+
+    def camera_color_callback(self, color_msg):
+        self.img = self.bridge.imgmsg_to_cv2(color_msg.data, desired_encoding='passthrough')
+
+    def camera_depth_callback(self, depth_msg):
+        self.depth_img = self.bridge.imgmsg_to_cv2(depth.data, desired_encoding='passthrough')
+
 
     def peopleRecnognition(self,img):
 
@@ -256,13 +268,13 @@ class ImageProcess:
     def run(self):
 
         while not rospy.is_shutdown():
-            ret, depth_frame, color_frame = self.image.get_frame()
+            #ret, depth_frame, color_frame = self.image.get_frame()
 
-            img = color_frame
-            self.peopleRecnognition(img)
-            self.interfaceDrawing(img, depth_frame)
+            #img = color_frame
+            self.peopleRecnognition(self.img)
+            self.interfaceDrawing(self.img, self.depth_frame)
 
-            self.img_pub.publish(img)
+            self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, desired_encoding='passthrough'))
 
             #cv2.imshow("Color frame", img)
             #key = cv2.waitKey(1)

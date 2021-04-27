@@ -1,5 +1,5 @@
 <launch>
-
+  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	<arg name="set_lidar_frame_id" default="base_scan"/>
 
 
@@ -19,7 +19,7 @@
 
 <!--   	
   arg name="model" default="$(find ares_description)/urdf/ares.urdf.xacro"/>
-  <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
+  
   <arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
   
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />

@@ -22,6 +22,12 @@ POS_Right: int = 2 * image_width / 3
 POS_Left: int = image_width / 3
 TextSpace = 10
 
+point_mid = (int(POS_Mid), heightDistanceMessureing)
+point_right = (int(POS_Right), heightDistanceMessureing)
+point_left = (int(POS_Left), heightDistanceMessureing)
+point_FRONT = (640, 360)
+
+
 # SensorBox Postions
 BoxSpace = 20
 background = (57, 58, 54)
@@ -45,6 +51,7 @@ textThikness = 3
 texFont_Size = 0.8
 
 
+
 class ImageProcess:
 
 
@@ -60,6 +67,10 @@ class ImageProcess:
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
         self.img
         self.depth_img
+        self.distance_mid = 0
+        self.distance_right = 0
+        self.distance_left = 0
+        self.distance_FRONT = 0
         self.bridge = CvBridge()
 
         self.img_pub= rospy.Publisher("/image", Image, queue_size=10)
@@ -104,17 +115,27 @@ class ImageProcess:
     def camera_color_callback(self, color_msg):
         self.img = self.bridge.imgmsg_to_cv2(color_msg.data, desired_encoding='passthrough')
 
+        self.img = self.interfaceDrawing(self.img)
+        self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, desired_encoding='passthrough'))
+
+
+
     def camera_depth_callback(self, depth_msg):
         self.depth_img = self.bridge.imgmsg_to_cv2(depth.data, desired_encoding='passthrough')
+
+        self.distance_mid = round((depth_img[point_mid[1], point_mid[0]]) / 10)
+        self.distance_right = round((depth_img[point_right[1], point_right[0]]) / 10)
+        self.distance_left = round((depth_img[point_left[1], point_left[0]]) / 10)
+        self.distance_FRONT = round((depth_img[point_FRONT[1], point_FRONT[0]]) / 10)
 
 
     def peopleRecnognition(self,img):
 
-                # Recognition People
+        # Recognition People
 
-                # img = color_frame
-                gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-                faces = self.faceCascade.detectMultiScale(
+        # img = color_frame
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        faces = self.faceCascade.detectMultiScale(
                     gray,
                     scaleFactor=1.1,
                     minNeighbors=5,
@@ -122,31 +143,27 @@ class ImageProcess:
                     flags=cv2.CASCADE_SCALE_IMAGE  # .cv.CV_HAAR_SCALE_IMAGE has been removed
                 )
 
-                for (x, y, w, h) in faces:
-                    cv2.rectangle(img, (x, y), (x + w, y + h), (0, 225, 0), 2)
+        for (x, y, w, h) in faces:
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 225, 0), 2)
 
-                    x_medium = int((x + x + w) / 2)  # finding de center of the face
-                    y_medium = int((y + y + h) / 2)
+            x_medium = int((x + x + w) / 2)  # finding de center of the face
+            y_medium = int((y + y + h) / 2)
 
-    def interfaceDrawing(self,img, depth_img):
+
+    def interfaceDrawing(self, img):
 
                 # Structure of the depth_Messurance
-                point_mid = (int(POS_Mid), heightDistanceMessureing)
-                point_right = (int(POS_Right), heightDistanceMessureing)
-                point_left = (int(POS_Left), heightDistanceMessureing)
                 cv2.circle(img, point_mid, 6, (0, 0, 255), 3)
                 cv2.circle(img, point_right, 6, (0, 0, 255), 3)
                 cv2.circle(img, point_left, 6, (0, 0, 255), 3)
-                distance_mid = round((depth_img[point_mid[1], point_mid[0]]) / 10)
-                distance_right = round((depth_img[point_right[1], point_right[0]]) / 10)
-                distance_left = round((depth_img[point_left[1], point_left[0]]) / 10)
+                
 
-                # print('Right: ' , distance_right , '; MID ' , distance_mid , '; Left' , distance_left)
-                cv2.putText(img, str(distance_mid) + "cm", (int(POS_Mid + TextSpace), heightDistanceMessureing), textType,
+                # print('Right: ' , self.distance_right , '; MID ' , self.distance_mid , '; Left' , self.distance_left)
+                cv2.putText(img, str(self.distance_mid) + "cm", (int(POS_Mid + TextSpace), heightDistanceMessureing), textType,
                             texFont_Size, red, textThikness)
-                cv2.putText(img, str(distance_right) + "cm", (int(POS_Right + TextSpace), heightDistanceMessureing),
+                cv2.putText(img, str(self.distance_right) + "cm", (int(POS_Right + TextSpace), heightDistanceMessureing),
                             textType, texFont_Size, red, textThikness)
-                cv2.putText(img, str(distance_left) + "cm", (int(POS_Left + TextSpace), heightDistanceMessureing), textType,
+                cv2.putText(img, str(self.distance_left) + "cm", (int(POS_Left + TextSpace), heightDistanceMessureing), textType,
                             texFont_Size, red, textThikness)
 
                 # Box for TEMP_Front
@@ -167,10 +184,9 @@ class ImageProcess:
                               (SensorBoxColum_Right + SensorBox_width, int(SensorBox_Level_3) + SensorBox_height),
                               background, -1, )
 
-                point_FRONT = (640, 360)
                 cv2.circle(img, point_FRONT, 6, (0, 0, 255), 3)
-                distance_FRONT = round((depth_img[point_FRONT[1], point_FRONT[0]]) / 10)
-                cv2.putText(img, str(distance_FRONT) + "cm",
+
+                cv2.putText(img, str(self.distance_FRONT) + "cm",
                             (SensorBoxColum_Right + TextSpace, (int(SensorBox_Level_3) + SensorBox_height - TextSpace)),
                             cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
@@ -232,6 +248,8 @@ class ImageProcess:
                 combine = cv2.addWeighted(roi, 1, LogoAres, 0.5, 0)
                 img[BoxSpace: h_roi, BoxSpace: w_roi] = combine
 
+                return img
+
                 # Liitle ARES
                 #    p1 = (1140, 40)
                 #    p2 = (1140, 70)
@@ -271,8 +289,8 @@ class ImageProcess:
             #ret, depth_frame, color_frame = self.image.get_frame()
 
             #img = color_frame
-            self.peopleRecnognition(self.img)
-            self.interfaceDrawing(self.img, self.depth_frame)
+            #self.peopleRecnognition(self.img)
+            self.img = self.interfaceDrawing(self.img)
 
             self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, desired_encoding='passthrough'))
 
@@ -288,7 +306,7 @@ if __name__ == '__main__':
         rospy.init_node('imageProcess', anonymous=True)
 
         imageProcess = ImageProcess()
-        imageProcess.run()
+        #imageProcess.run()
 
     except rospy.ROSInterruptException:
         pass

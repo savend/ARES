@@ -16,7 +16,7 @@ from typing import Tuple
 image_width = 640
 image_height = 480
 
-heightDistanceMessureing = image_height * (2/3)
+heightDistanceMessureing = image_height * (3/4)
 POS_Mid = image_width / 2
 POS_Right = 2 * image_width / 3
 POS_Left = image_width / 3
@@ -34,7 +34,7 @@ background = (57, 58, 54)
 Rim = (0, 0, 0)
 
 SensorBox_width = 120
-SensorBox_height = 60
+SensorBox_height = 45
 SensorBoxColum_Right = BoxSpace
 SensorBoxColum_Left: int = image_width - SensorBox_width - BoxSpace
 
@@ -47,8 +47,8 @@ SensorBox_Level_4: int = image_height / 2 + 180
 
 textType = cv2.FONT_HERSHEY_SIMPLEX
 red = (0, 0, 225)
-textThikness = 3
-texFont_Size = 0.8
+textThikness = 2
+texFont_Size = 0.5
 
 
 
@@ -84,7 +84,7 @@ class ImageProcess:
         self.obj_temp_sub = rospy.Subscriber("object_temp", Float64, self.obj_temp_sensor_callback)
         self.emergency_sub = rospy.Subscriber("emergency_button_state", Bool, self.emergency_button_state_callback)
         self.color_frame_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.camera_color_callback) #DepthCamera()
-        self.depth_frame_sub = rospy.Subscriber("/camera/depth/image_raw", Image, self.camera_depth_callback) #DepthCamera()
+        self.depth_frame_sub = rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.camera_depth_callback) #DepthCamera()
 
 
 
@@ -92,7 +92,7 @@ class ImageProcess:
         self.o2_data=o2_msg.data
 
     def batteryState_callback(self,battery_msg):
-        self.battery_data = battery_msg.data
+        self.battery_data = battery_msg.voltage
 
     #def env_temp_sensor_callback(self,envTemp_msg):
     #   env_Temp_data=envTemp_msg.data
@@ -114,41 +114,36 @@ class ImageProcess:
 
     def camera_color_callback(self, color_msg):
         self.img = self.bridge.imgmsg_to_cv2(color_msg, desired_encoding='bgr8')
-
         self.img = self.interfaceDrawing(self.img)
+        self.img = self.peopleRecnognition(self.img)
         self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, encoding='passthrough'))
 
 
 
     def camera_depth_callback(self, depth_msg):
-        self.depth_img = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='mono8')
+        self.depth_img = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
 
-        self.distance_mid = round((depth_img[point_mid[1], point_mid[0]]) / 10)
-        self.distance_right = round((depth_img[point_right[1], point_right[0]]) / 10)
-        self.distance_left = round((depth_img[point_left[1], point_left[0]]) / 10)
-        self.distance_FRONT = round((depth_img[point_FRONT[1], point_FRONT[0]]) / 10)
+        self.distance_mid = round((self.depth_img[point_mid[1], point_mid[0]]) / 10)
+        self.distance_right = round((self.depth_img[point_right[1], point_right[0]]) / 10)
+        self.distance_left = round((self.depth_img[point_left[1], point_left[0]]) / 10)
+        self.distance_FRONT = round((self.depth_img[point_FRONT[1], point_FRONT[0]]) / 10)
 
 
-    def peopleRecnognition(self,img):
+    def peopleRecnognition(self, img):
 
         # Recognition People
 
-        # img = color_frame
+        #img = color_frame
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        faces = self.faceCascade.detectMultiScale(
-                    gray,
-                    scaleFactor=1.1,
-                    minNeighbors=5,
-                    minSize=(30, 30),
-                    flags=cv2.CASCADE_SCALE_IMAGE  # .cv.CV_HAAR_SCALE_IMAGE has been removed
-                )
+        faces = self.faceCascade.detectMultiScale( gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30), flags=cv2.CASCADE_SCALE_IMAGE )
 
         for (x, y, w, h) in faces:
             cv2.rectangle(img, (x, y), (x + w, y + h), (0, 225, 0), 2)
 
             x_medium = int((x + x + w) / 2)  # finding de center of the face
             y_medium = int((y + y + h) / 2)
-
+       
+        return img
 
     def interfaceDrawing(self, img):
 
@@ -218,7 +213,6 @@ class ImageProcess:
                 #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_1)),
                 #              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_1) + SensorBox_height), background,
                 #              -1, )
-
                 #cv2.putText(img, str(self.envHumid_data),
                 #            (SensorBoxColum_Left, (int(SensorBox_Level_1) + SensorBox_height - TextSpace)),
                 #            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
@@ -235,11 +229,17 @@ class ImageProcess:
                 #            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for Batterie
+                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
+                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,-1, )
+
+                #cv2.putText(img, str(self.envPressure_data),(SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - TextSpace)),cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
+
+ 
 
                 # Box for Signalstärke
 
                 # LOGO ARES
-                LogoAres = cv2.imread('/home/ares/catkin_ws/src/ARES/ares_interface/src/ARESLOGO_Black.jpg')
+                LogoAres = cv2.imread('ARESLOGO_Black.jpg')
                 if LogoAres is None:
                     rospy.loginfo("error")
                 h_LoGo = LogoAres.shape[0]
@@ -250,7 +250,7 @@ class ImageProcess:
 
                 roi = img[BoxSpace: h_roi, BoxSpace: w_roi]
                 combine = cv2.addWeighted(roi, 1, LogoAres, 0.5, 0)
-                #img[BoxSpace: h_roi, BoxSpace: w_roi] = combine
+                img[BoxSpace: h_roi, BoxSpace: w_roi] = combine
 
                 return img
 
@@ -293,15 +293,15 @@ class ImageProcess:
             #ret, depth_frame, color_frame = self.image.get_frame()
 
             #img = color_frame
-            #self.peopleRecnognition(self.img)
+            self.peopleRecnognition(self.img)
             self.img = self.interfaceDrawing(self.img)
 
             self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, desired_encoding='passthrough'))
 
-            #cv2.imshow("Color frame", img)
-            #key = cv2.waitKey(1)
-            #if key == 27:  # esc key ends process
-            #    break
+            cv2.imshow("Color frame", img)
+            key = cv2.waitKey(1)
+            if key == 27:  # esc key ends process
+                break
 
 
 

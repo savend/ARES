@@ -348,7 +348,7 @@
   <joint name="scan_joint" type="fixed">
     <parent link="chassis"/>
     <child link="base_scan"/>
-    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <origin xyz="0 0 0.1" rpy="0 0 1.57075"/>
   </joint>
 
     <gazebo>

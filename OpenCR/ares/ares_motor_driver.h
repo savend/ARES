@@ -81,6 +81,7 @@ class AresMotorDriver
 
   dynamixel::GroupSyncWrite *groupSyncWriteVelocity_;
   dynamixel::GroupSyncRead *groupSyncReadEncoder_;
+  dynamixel::GroupSyncRead *groupSyncReadError_;
 };
 
 #endif // ARES_MOTOR_DRIVER_H_

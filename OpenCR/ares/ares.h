@@ -64,13 +64,15 @@
 //****************************
 
 //*******Definition of digital pins on the OpenCR*****
-#define RELAIS_PIN                        8
-#define EMERGENCY_SWITCH_INTERRUPT_PIN    4
+#define RELAIS_PIN_HEADLIGHTS                        8    // OpenCR PIN
+#define RELAIS_PIN_VENTILATOR                        10   // OpenCR PIN
+#define EMERGENCY_SWITCH_INTERRUPT_PIN               4    // OpenCR PIN
 //****************************************************
 
 
 //*******Definition of global variables**************
-bool emergency_state; 									// warning flag rised when emergency button was pressed
+#define DEBOUNCE_TIME                                25  // time in ms for debouncing emergency button in emergencyCallback (ISR)
+
 //****************************************************
 
 #define WHEEL_RADIUS                    0.06     // meter
@@ -155,6 +157,7 @@ void soundCallback(const ares_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 void headlightsCallback(const std_msgs::Bool& headlights_status_msg);
+void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg);
 
 // Function prototypes
 void publishCmdVelFromRC100Msg(void);
@@ -169,7 +172,7 @@ void publishIRtempMesurement(void);
 void publishO2Mesurement(void);
 void publishEnvParametersMesurement(void);
 
-void emergencyCallback (void); // get emergencyButton pressed, and publish emergency warning flag
+void publishEmergencyState (void); // get emergencyButton pressed, and publish emergency warning flag
 void reinitMotorsCallback (void); // get emergencyButton released, reinitialize the motors and reset emergency_state to 0
 
 ros::Time rosNow(void);
@@ -227,6 +230,8 @@ ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallbac
 ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 
 ros::Subscriber<std_msgs::Bool> headlights_status_sub("headlights_status", headlightsCallback);
+
+ros::Subscriber<std_msgs::Bool> ventilator_status_sub("ventilator_status", ventilatorCallback);
 
 /*******************************************************************************
 * Publisher

@@ -93,9 +93,8 @@ void setup()
   pinMode(BATTERY_LED_PIN, OUTPUT);
   digitalWrite(BATTERY_LED_PIN, HIGH);
 
-  //pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
+  pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
   //attachInterrupt(2, emergencyCallback, CHANGE);   // when emergency button is pressed (voltage is falling on the Pin) or released (voltage rising back )
-  emergency_state = false;
 
   // Init diagnosis
   diagnosis.init();
@@ -208,7 +207,7 @@ void loop()
 
 
   motor_driver.readError(motor_error_1, motor_error_2, motor_error_3, motor_error_4);
-  if(motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
+  if (motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
   {
     sprintf(log_msg,  "motor 1 : %d, motor 2 : %d, motor 3 : %d, motor 4 : %d", motor_error_1, motor_error_2, motor_error_3, motor_error_4);
     //char log_msg[50];
@@ -230,6 +229,9 @@ void loop()
 
   // Wait the serial link time to process
   waitForSerialLink(nh.connected());
+
+  publishEmergencyState();
+
 }
 
 /*******************************************************************************
@@ -294,7 +296,7 @@ void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
 {
   bool headlights_status = headlights_status_msg.data;
 
-  if(headlights_status == true)
+  if (headlights_status == true)
   {
     digitalWrite(RELAIS_PIN_HEADLIGHTS, LOW);
   }
@@ -309,7 +311,7 @@ void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg)
 {
   bool ventilator_status = ventilator_status_msg.data;
 
-  if(ventilator_status == true)
+  if (ventilator_status == true)
   {
     digitalWrite(RELAIS_PIN_VENTILATOR, HIGH);
   }
@@ -362,7 +364,7 @@ void publishSensorStateMsg(void)
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_rear_encoder, sensor_state_msg.right_rear_encoder, sensor_state_msg.left_front_encoder, sensor_state_msg.right_front_encoder);
 
-  if(dxl_comm_result == true)
+  if (dxl_comm_result == true)
     updateMotorInfo(sensor_state_msg.left_rear_encoder, sensor_state_msg.right_rear_encoder, sensor_state_msg.left_front_encoder, sensor_state_msg.right_front_encoder);
   else
     return;
@@ -405,7 +407,7 @@ void publishBatteryStateMsg(void)
   battery_state_msg.voltage = sensors.checkVoltage();
   battery_state_msg.percentage = (float)(battery_state_msg.voltage / 11.1f);
 
-  if(battery_state == 0)
+  if (battery_state == 0)
     battery_state_msg.present = false;
   else
     battery_state_msg.present = true;
@@ -488,25 +490,34 @@ void publishEnvParametersMesurement(void)
 /*******************************************************************************
   Get if emergencyButton pressed, Publish warning flag, and Reinitialize the motors
 *******************************************************************************/
-void emergencyCallback (void)
+void publishEmergencyState (void)
 {
-  if((long)(micros() - previous_micros) >= debouncing_time)
+  static long previous_millis = millis();
+  static bool button_state;                                                           // tells if the button is pressed or released
+  static bool previous_button_state = digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN);    // tells if the button was pressed or released
+  static bool emergency_state = false;                                                // warning flag rised when emergency button was pressed
+
+  button_state = digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN);
+  
+  if (button_state != previous_button_state)
   {
-    if(digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+    if (millis() - previous_millis >= DEBOUNCE_TIME)
     {
-      emergency_state = true; // warning: emergency button was pressed !
-    }
-    else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
-    {
-      //motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
-      motor_driver.init();
-      emergency_state = false;
-    }
+      if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+      {
+        emergency_state = true; // warning: emergency button was pressed !
+      }
+      else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
+      {
+        motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
+        //motor_driver.init();
+        emergency_state = false;
+      }
+      emergency_state_msg.data = emergency_state;
+      emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
 
-    emergency_state_msg.data = emergency_state;
-    emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
-
-    previous_micros = micros();
+      previous_millis = millis();
+    }
   }
 }
 

@@ -71,9 +71,8 @@
 
 
 //*******Definition of global variables**************
-long debouncing_time = 25000;                       // time in µs for debouncing emergency button in emergencyCallback (ISR)
-volatile unsigned long previous_micros;          // time in µs for since previous debouncing emergency button in emergencyCallback (ISR)
-volatile bool emergency_state; 									// warning flag rised when emergency button was pressed
+#define DEBOUNCE_TIME                                25  // time in ms for debouncing emergency button in emergencyCallback (ISR)
+
 //****************************************************
 
 #define WHEEL_RADIUS                    0.06     // meter
@@ -173,7 +172,7 @@ void publishIRtempMesurement(void);
 void publishO2Mesurement(void);
 void publishEnvParametersMesurement(void);
 
-void emergencyCallback (void); // get emergencyButton pressed, and publish emergency warning flag
+void publishEmergencyState (void); // get emergencyButton pressed, and publish emergency warning flag
 void reinitMotorsCallback (void); // get emergencyButton released, reinitialize the motors and reset emergency_state to 0
 
 ros::Time rosNow(void);

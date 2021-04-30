@@ -1,17 +1,17 @@
 /*******************************************************************************
-* Copyright 2016 ROBOTIS CO., LTD.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*     http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
+  Copyright 2016 ROBOTIS CO., LTD.
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
 *******************************************************************************/
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
@@ -21,7 +21,7 @@
 
 
 /*******************************************************************************
-* Setup function
+  Setup function
 *******************************************************************************/
 void setup()
 {
@@ -36,9 +36,9 @@ void setup()
   nh.subscribe(motor_power_sub);
   nh.subscribe(reset_sub);
   nh.subscribe(headlights_status_sub);
-  
+  nh.subscribe(ventilator_status_sub);
 
-  nh.advertise(sensor_state_pub);  
+  nh.advertise(sensor_state_pub);
   nh.advertise(version_info_pub);
   nh.advertise(imu_pub);
   nh.advertise(cmd_vel_rc100_pub);
@@ -60,40 +60,43 @@ void setup()
 
   // Setting for IMU
   sensors.init();
-  
+
   //setup for the sensors
   ir_temp_sensor.begin();
-  
+
   char log_msg[100];
-  
+
   if (!o2_sensor.begin(O2_SENSOR_I2C_ADDRESS))
-	{
-		sprintf(log_msg, "O2-sensor I2C connection failled !");
-		nh.loginfo(log_msg);
-	}
-	
+  {
+    sprintf(log_msg, "O2-sensor I2C connection failled !");
+    nh.loginfo(log_msg);
+  }
+
   if (!env_sensor.begin())
-	{
-		sprintf(log_msg, "Could not find a valid BME680 environment sensor, check wiring!");
-		nh.loginfo(log_msg);
-	}
+  {
+    sprintf(log_msg, "Could not find a valid BME680 environment sensor, check wiring!");
+    nh.loginfo(log_msg);
+  }
   env_sensor.setTemperatureOversampling(BME680_OS_8X);
   env_sensor.setHumidityOversampling(BME680_OS_2X);
   env_sensor.setPressureOversampling(BME680_OS_4X);
   env_sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
   env_sensor.setGasHeater(320, 150); // 320*C for 150 ms
 
-  // Digital PinMode declaration on the OpenCR  
-  pinMode(RELAIS_PIN, OUTPUT);
-  digitalWrite(RELAIS_PIN, HIGH);
-  
+  // Digital PinMode declaration on the OpenCR
+  pinMode(RELAIS_PIN_HEADLIGHTS, OUTPUT);
+  digitalWrite(RELAIS_PIN_HEADLIGHTS, HIGH);
+
+  pinMode(RELAIS_PIN_VENTILATOR, OUTPUT);
+  digitalWrite(RELAIS_PIN_VENTILATOR, LOW);
+
   pinMode(BATTERY_LED_PIN, OUTPUT);
   digitalWrite(BATTERY_LED_PIN, HIGH);
-  
+
   pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
   attachInterrupt(2, emergencyCallback, CHANGE);   // when emergency button is pressed (voltage is falling on the Pin) or released (voltage rising back )
   emergency_state = false;
-    
+
   // Init diagnosis
   diagnosis.init();
 
@@ -108,13 +111,13 @@ void setup()
   prev_update_time = millis();
 
   pinMode(LED_WORKING_CHECK, OUTPUT);
- 
+
   setup_end = true;
 }
 
 
 /*******************************************************************************
-* Loop function
+  Loop function
 *******************************************************************************/
 void loop()
 {
@@ -123,18 +126,18 @@ void loop()
   updateVariable(nh.connected());
   updateTFPrefix(nh.connected());
 
-  if ((t-tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
+  if ((t - tTime[0]) >= (1000 / CONTROL_MOTOR_SPEED_FREQUENCY))
   {
     updateGoalVelocity();
-    if ((t-tTime[6]) > CONTROL_MOTOR_TIMEOUT) 
+    if ((t - tTime[6]) > CONTROL_MOTOR_TIMEOUT)
     {
 
       goal_velocity[0] = zero_velocity[0];
       goal_velocity[1] = zero_velocity[1];
       controlAres();
-    } 
+    }
     else {
-            
+
 
 
       controlAres();
@@ -142,13 +145,13 @@ void loop()
     tTime[0] = t;
   }
 
-  if ((t-tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
+  if ((t - tTime[1]) >= (1000 / CMD_VEL_PUBLISH_FREQUENCY))
   {
     publishCmdVelFromRC100Msg();
     tTime[1] = t;
   }
 
-  if ((t-tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
+  if ((t - tTime[2]) >= (1000 / DRIVE_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishSensorStateMsg();
     publishBatteryStateMsg();
@@ -158,21 +161,21 @@ void loop()
     tTime[2] = t;
   }
 
-  if ((t-tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
+  if ((t - tTime[3]) >= (1000 / IMU_PUBLISH_FREQUENCY))
   {
     publishImuMsg();
     publishMagMsg();
     tTime[3] = t;
   }
 
-  if ((t-tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
+  if ((t - tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishVersionInfoMsg();
     tTime[4] = t;
   }
 
 #ifdef DEBUG
-  if ((t-tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
+  if ((t - tTime[5]) >= (1000 / DEBUG_LOG_FREQUENCY))
   {
     sendDebuglog();
     tTime[5] = t;
@@ -182,9 +185,9 @@ void loop()
   // Send log message after ROS connection
   sendLogMsg();
 
-  // Receive data from RC100 
+  // Receive data from RC100
   bool clicked_state = controllers.getRCdata(goal_velocity_from_rc100);
-  if (clicked_state == true)  
+  if (clicked_state == true)
     tTime[6] = millis();
 
   // Check push button pressed for simple test drive
@@ -197,21 +200,21 @@ void loop()
   // Update sonar data
   // sensors.updateSonar(t);
 
-  int motor_error_1=0;
-  int motor_error_2=0;
-  int motor_error_3=0;
-  int motor_error_4=0;
+  int motor_error_1 = 0;
+  int motor_error_2 = 0;
+  int motor_error_3 = 0;
+  int motor_error_4 = 0;
   char log_msg[50];
-  
+
 
   motor_driver.readError(motor_error_1, motor_error_2, motor_error_3, motor_error_4);
-  if(motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
+  if (motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
   {
-  sprintf(log_msg,  "motor 1 : %d, motor 2 : %d, motor 3 : %d, motor 4 : %d", motor_error_1, motor_error_2, motor_error_3, motor_error_4);
-  //char log_msg[50];
-  //sprintf(log_msg, "Goal velocity to control Ares");
-  nh.loginfo(log_msg);
-}
+    sprintf(log_msg,  "motor 1 : %d, motor 2 : %d, motor 3 : %d, motor 4 : %d", motor_error_1, motor_error_2, motor_error_3, motor_error_4);
+    //char log_msg[50];
+    //sprintf(log_msg, "Goal velocity to control Ares");
+    nh.loginfo(log_msg);
+  }
 
   // Start Gyro Calibration after ROS connection
   updateGyroCali(nh.connected());
@@ -230,7 +233,7 @@ void loop()
 }
 
 /*******************************************************************************
-* Callback function for cmd_vel msg
+  Callback function for cmd_vel msg
 *******************************************************************************/
 void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 {
@@ -243,7 +246,7 @@ void commandVelocityCallback(const geometry_msgs::Twist& cmd_vel_msg)
 }
 
 /*******************************************************************************
-* Callback function for sound msg
+  Callback function for sound msg
 *******************************************************************************/
 void soundCallback(const ares_msgs::Sound& sound_msg)
 {
@@ -251,7 +254,7 @@ void soundCallback(const ares_msgs::Sound& sound_msg)
 }
 
 /*******************************************************************************
-* Callback function for motor_power msg
+  Callback function for motor_power msg
 *******************************************************************************/
 void motorPowerCallback(const std_msgs::Bool& power_msg)
 {
@@ -261,10 +264,10 @@ void motorPowerCallback(const std_msgs::Bool& power_msg)
 }
 
 /*******************************************************************************
-* Callback function for reset msg
+  Callback function for reset msg
 *******************************************************************************/
 void resetCallback(const std_msgs::Empty& reset_msg)
-{ 
+{
   char log_msg[50];
 
   (void)(reset_msg);
@@ -280,11 +283,12 @@ void resetCallback(const std_msgs::Empty& reset_msg)
   initOdom();
 
   sprintf(log_msg, "Reset Odometry");
-  nh.loginfo(log_msg);  
+  nh.loginfo(log_msg);
 }
 
 /*******************************************************************************
-* Callback function for headlights 
+  Callback function for headlights
+  ATTENTION inverted logic: HIGH means LOW   and   LOW means HIGH
 *******************************************************************************/
 void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
 {
@@ -292,13 +296,28 @@ void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
 
   if (headlights_status == true)
   {
-    digitalWrite(RELAIS_PIN, LOW);
+    digitalWrite(RELAIS_PIN_HEADLIGHTS, LOW);
   }
-  else digitalWrite(RELAIS_PIN, HIGH);
+  else digitalWrite(RELAIS_PIN_HEADLIGHTS, HIGH);
 }
 
 /*******************************************************************************
-* Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
+  Callback function for ventilator
+  ATTENTION inverted logic: HIGH means LOW   and   LOW means HIGH
+*******************************************************************************/
+void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg)
+{
+  bool ventilator_status = ventilator_status_msg.data;
+
+  if (ventilator_status == true)
+  {
+    digitalWrite(RELAIS_PIN_VENTILATOR, HIGH);
+  }
+  else digitalWrite(RELAIS_PIN_VENTILATOR, LOW);
+}
+
+/*******************************************************************************
+  Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
 *******************************************************************************/
 void publishCmdVelFromRC100Msg(void)
 {
@@ -309,7 +328,7 @@ void publishCmdVelFromRC100Msg(void)
 }
 
 /*******************************************************************************
-* Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
+  Publish msgs (IMU data: angular velocity, linear acceleration, orientation)
 *******************************************************************************/
 void publishImuMsg(void)
 {
@@ -322,7 +341,7 @@ void publishImuMsg(void)
 }
 
 /*******************************************************************************
-* Publish msgs (Magnetic data)
+  Publish msgs (Magnetic data)
 *******************************************************************************/
 void publishMagMsg(void)
 {
@@ -356,16 +375,16 @@ void publishSensorStateMsg(void)
   // sensor_state_msg.sonar = sensors.getSonarData();
 
   sensor_state_msg.illumination = sensors.getIlluminationData();
-  
+
   sensor_state_msg.button = sensors.checkPushButton();
 
-//  sensor_state_msg.torque = motor_driver.getTorque();
+  //  sensor_state_msg.torque = motor_driver.getTorque();
 
   sensor_state_pub.publish(&sensor_state_msg);
 }
 
 /*******************************************************************************
-* Publish msgs (version info)
+  Publish msgs (version info)
 *******************************************************************************/
 void publishVersionInfoMsg(void)
 {
@@ -377,7 +396,7 @@ void publishVersionInfoMsg(void)
 }
 
 /*******************************************************************************
-* Publish msgs (battery_state)
+  Publish msgs (battery_state)
 *******************************************************************************/
 void publishBatteryStateMsg(void)
 {
@@ -389,13 +408,13 @@ void publishBatteryStateMsg(void)
   if (battery_state == 0)
     battery_state_msg.present = false;
   else
-    battery_state_msg.present = true;  
+    battery_state_msg.present = true;
 
   battery_state_pub.publish(&battery_state_msg);
 }
 
 /*******************************************************************************
-* Publish msgs (odometry, joint states, tf)
+  Publish msgs (odometry, joint states, tf)
 *******************************************************************************/
 void publishDriveInformation(void)
 {
@@ -425,73 +444,75 @@ void publishDriveInformation(void)
 }
 
 /*******************************************************************************
-* Publish the IR_temperature_mesurement (ambient_temerature, object_temperature) std_msgs
+  Publish the IR_temperature_mesurement (ambient_temerature, object_temperature) std_msgs
 *******************************************************************************/
 void publishIRtempMesurement(void)
 {
-	amb_temp_msg.data = ir_temp_sensor.GetAmbientTemp_Celsius();
-    ambient_temp_pub.publish(&amb_temp_msg);		
-	
-	obj_temp_msg.data = ir_temp_sensor.GetObjectTemp_Celsius();
-    object_temp_pub.publish(&obj_temp_msg);
+  amb_temp_msg.data = ir_temp_sensor.GetAmbientTemp_Celsius();
+  ambient_temp_pub.publish(&amb_temp_msg);
+
+  obj_temp_msg.data = ir_temp_sensor.GetObjectTemp_Celsius();
+  object_temp_pub.publish(&obj_temp_msg);
 }
 
 /*******************************************************************************
-* Publish the O2_volume_mesurement std_msgs
+  Publish the O2_volume_mesurement std_msgs
 *******************************************************************************/
 void publishO2Mesurement(void)
 {
-	o2_msg.data = o2_sensor.ReadOxygenData(COLLECT_NUMBER_AVG_O2);
-	o2_concentration_pub.publish(&o2_msg);
+  o2_msg.data = o2_sensor.ReadOxygenData(COLLECT_NUMBER_AVG_O2);
+  o2_concentration_pub.publish(&o2_msg);
 }
 
 /*******************************************************************************
-* Publish the Environment_parameters_mesurement (temperature, pressure, humidity) std_msgs
+  Publish the Environment_parameters_mesurement (temperature, pressure, humidity) std_msgs
 *******************************************************************************/
 void publishEnvParametersMesurement(void)
 {
-	if (!env_sensor.performReading())
-	{
-		char log_msg[50];
-		sprintf(log_msg, "Could not perform reading environment sensor");
-		nh.loginfo(log_msg);
-	}
-	env_temp_msg.data = env_sensor.temperature;
-	environment_temp_pub.publish(&env_temp_msg);
-	
-	env_pres_msg.data = (env_sensor.pressure / 100.0);
-	environment_pressure_pub.publish(&env_pres_msg);
-	
-	env_hum_msg.data = env_sensor.humidity;
-	environment_humidity_pub.publish(&env_hum_msg);
+  if (!env_sensor.performReading())
+  {
+    char log_msg[50];
+    sprintf(log_msg, "Could not perform reading environment sensor");
+    nh.loginfo(log_msg);
+  }
+  env_temp_msg.data = env_sensor.temperature;
+  environment_temp_pub.publish(&env_temp_msg);
+
+  env_pres_msg.data = (env_sensor.pressure / 100.0);
+  environment_pressure_pub.publish(&env_pres_msg);
+
+  env_hum_msg.data = env_sensor.humidity;
+  environment_humidity_pub.publish(&env_hum_msg);
 }
 
 /*******************************************************************************
-* Get if emergencyButton pressed, Publish warning flag, and Reinitialize the motors
+  Get if emergencyButton pressed, Publish warning flag, and Reinitialize the motors
 *******************************************************************************/
 void emergencyCallback (void)
-{  
-  if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+{
+  if ((long)(micros() - previous_micros) >= debouncing_time)
   {
-    emergency_state = true; // warning: emergency button was pressed !
-  }
-  else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
-  {
-//    if(emergency_state == true)
-//    {
-//      //motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
-//      //motor_driver.init();
-//    }
-    emergency_state = false;
-  }
+    if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+    {
+      emergency_state = true; // warning: emergency button was pressed !
+    }
+    else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
+    {
+      //motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
+      motor_driver.init();
+      emergency_state = false;
+    }
 
-  emergency_state_msg.data = emergency_state;
-  emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
+    emergency_state_msg.data = emergency_state;
+    emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
+
+    previous_micros = micros();
+  }
 }
 
 
 /*******************************************************************************
-* Update TF Prefix
+  Update TF Prefix
 *******************************************************************************/
 void updateTFPrefix(bool isConnected)
 {
@@ -507,7 +528,7 @@ void updateTFPrefix(bool isConnected)
       if (!strcmp(get_tf_prefix, ""))
       {
         sprintf(odom_header_frame_id, "odom");
-        sprintf(odom_child_frame_id, "base_link");  
+        sprintf(odom_child_frame_id, "base_link");
 
         sprintf(imu_frame_id, "imu_link");
         sprintf(mag_frame_id, "mag_link");
@@ -531,16 +552,16 @@ void updateTFPrefix(bool isConnected)
       }
 
       sprintf(log_msg, "Setup TF on Odometry [%s]", odom_header_frame_id);
-      nh.loginfo(log_msg); 
+      nh.loginfo(log_msg);
 
       sprintf(log_msg, "Setup TF on IMU [%s]", imu_frame_id);
-      nh.loginfo(log_msg); 
+      nh.loginfo(log_msg);
 
       sprintf(log_msg, "Setup TF on MagneticField [%s]", mag_frame_id);
-      nh.loginfo(log_msg); 
+      nh.loginfo(log_msg);
 
       sprintf(log_msg, "Setup TF on JointState [%s]", joint_state_header_frame_id);
-      nh.loginfo(log_msg); 
+      nh.loginfo(log_msg);
 
       isChecked = true;
     }
@@ -552,7 +573,7 @@ void updateTFPrefix(bool isConnected)
 }
 
 /*******************************************************************************
-* Update the odometry
+  Update the odometry
 *******************************************************************************/
 void updateOdometry(void)
 {
@@ -569,7 +590,7 @@ void updateOdometry(void)
 }
 
 /*******************************************************************************
-* Update the joint states 
+  Update the joint states
 *******************************************************************************/
 void updateJointStates(void)
 {
@@ -591,7 +612,7 @@ void updateJointStates(void)
 }
 
 /*******************************************************************************
-* CalcUpdateulate the TF
+  CalcUpdateulate the TF
 *******************************************************************************/
 void updateTF(geometry_msgs::TransformStamped& odom_tf)
 {
@@ -604,13 +625,13 @@ void updateTF(geometry_msgs::TransformStamped& odom_tf)
 }
 
 /*******************************************************************************
-* Update motor information
+  Update motor information
 *******************************************************************************/
 void updateMotorInfo(int32_t left_rear_tick, int32_t right_rear_tick, int32_t left_front_tick, int32_t right_front_tick)
 {
   int32_t current_tick = 0;
   static int32_t last_tick[WHEEL_NUM] = {0, 0, 0, 0};
-  
+
   if (init_encoder)
   {
     for (int index = 0; index < WHEEL_NUM; index++)
@@ -620,7 +641,7 @@ void updateMotorInfo(int32_t left_rear_tick, int32_t right_rear_tick, int32_t le
       last_rad[index]       = 0.0;
 
       last_velocity[index]  = 0.0;
-    }  
+    }
 
     last_tick[LEFT_REAR] = left_rear_tick;
     last_tick[RIGHT_REAR] = right_rear_tick;
@@ -657,7 +678,7 @@ void updateMotorInfo(int32_t left_rear_tick, int32_t right_rear_tick, int32_t le
 }
 
 /*******************************************************************************
-* Calculate the odometry (TO VERIFY BECAUSE OF THE FOUR WHEELS)
+  Calculate the odometry (TO VERIFY BECAUSE OF THE FOUR WHEELS)
 *******************************************************************************/
 bool calcOdometry(double diff_time)
 {
@@ -690,10 +711,10 @@ bool calcOdometry(double diff_time)
     wheel_r = 0.0;
 
   delta_s     = WHEEL_RADIUS * (wheel_r + wheel_l) / 2.0;
-  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;  
+  // theta = WHEEL_RADIUS * (wheel_r - wheel_l) / WHEEL_SEPARATION;
   orientation = sensors.getOrientation();
-  theta       = atan2f(orientation[1]*orientation[2] + orientation[0]*orientation[3], 
-                0.5f - orientation[2]*orientation[2] - orientation[3]*orientation[3]);
+  theta       = atan2f(orientation[1] * orientation[2] + orientation[0] * orientation[3],
+                       0.5f - orientation[2] * orientation[2] - orientation[3] * orientation[3]);
 
   delta_theta = theta - last_theta;
 
@@ -721,7 +742,7 @@ bool calcOdometry(double diff_time)
 }
 
 /*******************************************************************************
-* Ares test drive using push buttons
+  Ares test drive using push buttons
 *******************************************************************************/
 void driveTest(uint8_t buttons)
 {
@@ -735,33 +756,33 @@ void driveTest(uint8_t buttons)
 
   motor_driver.readEncoder(current_tick[LEFT_REAR], current_tick[RIGHT_REAR], current_tick[LEFT_FRONT], current_tick[RIGHT_FRONT]);
 
-  if (buttons & (1<<0))  
+  if (buttons & (1 << 0))
   {
     move[LINEAR] = true;
     saved_tick[RIGHT_REAR] = current_tick[RIGHT_REAR];
 
 
-    diff_encoder = TEST_DISTANCE / ((WHEEL_RADIUS*2*3.141592) / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
+    diff_encoder = TEST_DISTANCE / ((WHEEL_RADIUS * 2 * 3.141592) / 4096); // (Circumference of Wheel) / (The number of tick per revolution)
     tTime[6] = millis();
   }
-  else if (buttons & (1<<1))
+  else if (buttons & (1 << 1))
   {
     move[ANGULAR] = true;
     saved_tick[RIGHT_REAR] = current_tick[RIGHT_REAR];
 
-    diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / ((WHEEL_RADIUS*2*3.141592) / 4096);
+    diff_encoder = (TEST_RADIAN * TURNING_RADIUS) / ((WHEEL_RADIUS * 2 * 3.141592) / 4096);
     tTime[6] = millis();
   }
 
   if (move[LINEAR])
-  {    
+  {
     if (abs(saved_tick[RIGHT_REAR] - current_tick[RIGHT_REAR]) <= diff_encoder)
     {
       goal_velocity_from_button[LINEAR]  = 0.05;
       char log_msg[50];
-  sprintf(log_msg, "In Method driveTest");
+      sprintf(log_msg, "In Method driveTest");
       nh.loginfo(log_msg);
-      
+
       tTime[6] = millis();
     }
     else
@@ -771,10 +792,10 @@ void driveTest(uint8_t buttons)
     }
   }
   else if (move[ANGULAR])
-  {   
+  {
     if (abs(saved_tick[RIGHT_REAR] - current_tick[RIGHT_REAR]) <= diff_encoder)
     {
-      goal_velocity_from_button[ANGULAR]= -0.7;
+      goal_velocity_from_button[ANGULAR] = -0.7;
       tTime[6] = millis();
     }
     else
@@ -786,16 +807,16 @@ void driveTest(uint8_t buttons)
 }
 
 /*******************************************************************************
-* Update variable (initialization)
+  Update variable (initialization)
 *******************************************************************************/
 void updateVariable(bool isConnected)
 {
   static bool variable_flag = false;
-  
+
   if (isConnected)
   {
     if (variable_flag == false)
-    {      
+    {
       sensors.initIMU();
       initOdom();
 
@@ -809,16 +830,16 @@ void updateVariable(bool isConnected)
 }
 
 /*******************************************************************************
-* Wait for Serial Link
+  Wait for Serial Link
 *******************************************************************************/
 void waitForSerialLink(bool isConnected)
 {
   static bool wait_flag = false;
-  
+
   if (isConnected)
   {
     if (wait_flag == false)
-    {      
+    {
       delay(10);
 
       wait_flag = true;
@@ -831,7 +852,7 @@ void waitForSerialLink(bool isConnected)
 }
 
 /*******************************************************************************
-* Update the base time for interpolation
+  Update the base time for interpolation
 *******************************************************************************/
 void updateTime()
 {
@@ -840,7 +861,7 @@ void updateTime()
 }
 
 /*******************************************************************************
-* ros::Time::now() implementation
+  ros::Time::now() implementation
 *******************************************************************************/
 ros::Time rosNow()
 {
@@ -848,7 +869,7 @@ ros::Time rosNow()
 }
 
 /*******************************************************************************
-* Start Gyro Calibration
+  Start Gyro Calibration
 *******************************************************************************/
 void updateGyroCali(bool isConnected)
 {
@@ -879,23 +900,23 @@ void updateGyroCali(bool isConnected)
 }
 
 /*******************************************************************************
-* Send log message
+  Send log message
 *******************************************************************************/
 void sendLogMsg(void)
 {
   static bool log_flag = false;
-  char log_msg[100];  
+  char log_msg[100];
 
   String name             = "ARES";
   String firmware_version = FIRMWARE_VER;
   String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 " + name;
-   
+
   const char* init_log_data = bringup_log.c_str();
 
   if (nh.connected())
   {
     if (log_flag == false)
-    {      
+    {
       sprintf(log_msg, "--------------------------");
       nh.loginfo(log_msg);
 
@@ -918,7 +939,7 @@ void sendLogMsg(void)
 }
 
 /*******************************************************************************
-* Initialization odometry data
+  Initialization odometry data
 *******************************************************************************/
 void initOdom(void)
 {
@@ -944,7 +965,7 @@ void initOdom(void)
 }
 
 /*******************************************************************************
-* Initialization joint states data
+  Initialization joint states data
 *******************************************************************************/
 void initJointStates(void)
 {
@@ -960,7 +981,7 @@ void initJointStates(void)
 }
 
 /*******************************************************************************
-* Update Goal Velocity
+  Update Goal Velocity
 *******************************************************************************/
 void updateGoalVelocity(void)
 {
@@ -972,7 +993,7 @@ void updateGoalVelocity(void)
 }
 
 /*******************************************************************************
-* Send Debug data
+  Send Debug data
 *******************************************************************************/
 void sendDebuglog(void)
 {
@@ -997,15 +1018,15 @@ void sendDebuglog(void)
   DEBUG_SERIAL.print("    x : "); DEBUG_SERIAL.println(quat[1]);
   DEBUG_SERIAL.print("    y : "); DEBUG_SERIAL.println(quat[2]);
   DEBUG_SERIAL.print("    z : "); DEBUG_SERIAL.println(quat[3]);
-  
+
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("DYNAMIXELS");
   DEBUG_SERIAL.println("---------------------------------------");
-//  DEBUG_SERIAL.println("Torque : " + String(motor_driver.getTorque()));
+  //  DEBUG_SERIAL.println("Torque : " + String(motor_driver.getTorque()));
 
   int32_t encoder[WHEEL_NUM] = {0, 0, 0, 0};
   motor_driver.readEncoder(encoder[LEFT_REAR], encoder[RIGHT_REAR], encoder[LEFT_FRONT], encoder[RIGHT_FRONT]);
-  
+
   DEBUG_SERIAL.println("Encoder(left_rear) : " + String(encoder[LEFT_REAR]));
   DEBUG_SERIAL.println("Encoder(right_rear) : " + String(encoder[RIGHT_REAR]));
   DEBUG_SERIAL.println("Encoder(left_front) : " + String(encoder[LEFT_FRONT]));
@@ -1014,18 +1035,18 @@ void sendDebuglog(void)
   DEBUG_SERIAL.println("---------------------------------------");
   DEBUG_SERIAL.println("Ares");
   DEBUG_SERIAL.println("---------------------------------------");
-  DEBUG_SERIAL.println("Odometry : ");   
+  DEBUG_SERIAL.println("Odometry : ");
   DEBUG_SERIAL.print("         x : "); DEBUG_SERIAL.println(odom_pose[0]);
   DEBUG_SERIAL.print("         y : "); DEBUG_SERIAL.println(odom_pose[1]);
   DEBUG_SERIAL.print("     theta : "); DEBUG_SERIAL.println(odom_pose[2]);
 }
 
 /*******************************************************************************
-* Control bike speed
+  Control bike speed
 *******************************************************************************/
 void controlAres(void)
 {
-  
+
 
 
   bool dxl_comm_result = false;
@@ -1086,6 +1107,6 @@ void controlAres(void)
   dxl_comm_result = motor_driver.controlMotor((int64_t)lin_vel1, (int64_t)lin_vel2, (int64_t)lin_vel3, (int64_t)lin_vel4);
   if (dxl_comm_result == false)
     return;
-   
-  
+
+
 }

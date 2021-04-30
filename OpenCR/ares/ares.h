@@ -64,13 +64,16 @@
 //****************************
 
 //*******Definition of digital pins on the OpenCR*****
-#define RELAIS_PIN                        8
-#define EMERGENCY_SWITCH_INTERRUPT_PIN    4
+#define RELAIS_PIN_HEADLIGHTS                        8    // OpenCR PIN
+#define RELAIS_PIN_VENTILATOR                        10   // OpenCR PIN
+#define EMERGENCY_SWITCH_INTERRUPT_PIN               4    // OpenCR PIN
 //****************************************************
 
 
 //*******Definition of global variables**************
-bool emergency_state; 									// warning flag rised when emergency button was pressed
+long debouncing_time = 25000;                       // time in µs for debouncing emergency button in emergencyCallback (ISR)
+volatile unsigned long previous_micros;          // time in µs for since previous debouncing emergency button in emergencyCallback (ISR)
+volatile bool emergency_state; 									// warning flag rised when emergency button was pressed
 //****************************************************
 
 #define WHEEL_RADIUS                    0.06     // meter
@@ -155,6 +158,7 @@ void soundCallback(const ares_msgs::Sound& sound_msg);
 void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 void headlightsCallback(const std_msgs::Bool& headlights_status_msg);
+void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg);
 
 // Function prototypes
 void publishCmdVelFromRC100Msg(void);
@@ -227,6 +231,8 @@ ros::Subscriber<std_msgs::Bool> motor_power_sub("motor_power", motorPowerCallbac
 ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 
 ros::Subscriber<std_msgs::Bool> headlights_status_sub("headlights_status", headlightsCallback);
+
+ros::Subscriber<std_msgs::Bool> ventilator_status_sub("ventilator_status", ventilatorCallback);
 
 /*******************************************************************************
 * Publisher

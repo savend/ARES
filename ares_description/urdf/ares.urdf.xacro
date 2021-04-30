@@ -260,6 +260,25 @@
 		<material>Gazebo/Grey</material>
 	</gazebo>
 
+	<gazebo>
+  <plugin name="skid_steer_drive_controller" filename="libgazebo_ros_skid_steer_drive.so">
+    <updateRate>100.0</updateRate>
+    <robotNamespace></robotNamespace>
+    <odometryTopic>odom</odometryTopic>
+    <odometryFrame>odom</odometryFrame>
+    <leftFrontJoint>left_front_wheel_joint</leftFrontJoint>
+    <rightFrontJoint>right_front_wheel_joint</rightFrontJoint>
+    <leftRearJoint>left_rear_wheel_joint</leftRearJoint>
+    <rightRearJoint>right_rear_wheel_joint</rightRearJoint>
+    <wheelSeparation>0.25724</wheelSeparation>
+    <wheelDiameter>0.12</wheelDiameter>
+    <robotBaseFrame>base_link</robotBaseFrame>
+    <torque>20000</torque>
+    <commandTopic>cmd_vel</commandTopic>
+    <broadcastTF>true</broadcastTF>
+  </plugin>
+</gazebo>
+
 <!-- 	<link name="front_handle">
 		<visual>
 			<geometry>
@@ -329,7 +348,7 @@
   <joint name="scan_joint" type="fixed">
     <parent link="chassis"/>
     <child link="base_scan"/>
-    <origin xyz="0 0 0.1" rpy="0 0 0"/>
+    <origin xyz="0 0 0.1" rpy="0 0 1.57075"/>
   </joint>
 
     <gazebo>
@@ -340,7 +359,7 @@
       <topicName>imu</topicName>
       <serviceName>imu_service</serviceName>
       <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>0</updateRate>
+      <updateRate>5</updateRate>
       <imu>
         <noise>
           <type>gaussian</type>
@@ -360,6 +379,8 @@
       </imu>
     </plugin>
   </gazebo>
+
+
 
   <gazebo reference="base_scan">
     <material>Gazebo/FlatBlack</material>

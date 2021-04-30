@@ -69,6 +69,7 @@ bool AresMotorDriver::init(void)
 
   groupSyncWriteVelocity_ = new dynamixel::GroupSyncWrite(portHandler_, packetHandler_, ADDR_X_GOAL_VELOCITY, LEN_X_GOAL_VELOCITY);
   groupSyncReadEncoder_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
+  groupSyncReadError_   = new dynamixel::GroupSyncRead(portHandler_, packetHandler_, 70, 1);
 
   return true;
 }
@@ -164,18 +165,18 @@ bool AresMotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_
   bool dxl_getdata_result = false;                 // GetParam result
 
   // Set parameter
-  dxl_addparam_result = groupSyncReadEncoder_->addParam(left_rear_wheel_id_);
+  dxl_addparam_result = groupSyncReadError_->addParam(left_rear_wheel_id_);
   if (dxl_addparam_result != true)
     return false;
 
-  dxl_addparam_result = groupSyncReadEncoder_->addParam(right_rear_wheel_id_);
+  dxl_addparam_result = groupSyncReadError_->addParam(right_rear_wheel_id_);
   if (dxl_addparam_result != true)
     return false;
-  dxl_addparam_result = groupSyncReadEncoder_->addParam(left_front_wheel_id_);
+  dxl_addparam_result = groupSyncReadError_->addParam(left_front_wheel_id_);
   if (dxl_addparam_result != true)
     return false;
 
-  dxl_addparam_result = groupSyncReadEncoder_->addParam(right_front_wheel_id_);
+  dxl_addparam_result = groupSyncReadError_->addParam(right_front_wheel_id_);
   if (dxl_addparam_result != true)
     return false;
 
@@ -186,29 +187,29 @@ bool AresMotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_
     Serial.println(packetHandler_->getTxRxResult(dxl_comm_result));
 
   // Check if groupSyncRead data of Dynamixels are available
-  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(left_rear_wheel_id_, 70, 1);
+  dxl_getdata_result = groupSyncReadError_->isAvailable(left_rear_wheel_id_, 70, 1);
   if (dxl_getdata_result != true)
     return false;
 
-  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(right_rear_wheel_id_, 70, 1);
+  dxl_getdata_result = groupSyncReadError_->isAvailable(right_rear_wheel_id_, 70, 1);
   if (dxl_getdata_result != true)
     return false;
-  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(left_front_wheel_id_, 70, 1);
+  dxl_getdata_result = groupSyncReadError_->isAvailable(left_front_wheel_id_, 70, 1);
   if (dxl_getdata_result != true)
     return false;
 
-  dxl_getdata_result = groupSyncReadEncoder_->isAvailable(right_front_wheel_id_, 70, 1);
+  dxl_getdata_result = groupSyncReadError_->isAvailable(right_front_wheel_id_, 70, 1);
   if (dxl_getdata_result != true)
     return false;
 
   // Get data
-  left_rear_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  70, 1);
-  right_rear_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, 70, 1);
-  left_front_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  70, 1);
-  right_front_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, 70, 1);
+  left_rear_value  = groupSyncReadError_->getData(left_rear_wheel_id_,  70, 1);
+  right_rear_value = groupSyncReadError_->getData(right_rear_wheel_id_, 70, 1);
+  left_front_value  = groupSyncReadError_->getData(left_rear_wheel_id_,  70, 1);
+  right_front_value = groupSyncReadError_->getData(right_rear_wheel_id_, 70, 1);
 
 
-  groupSyncReadEncoder_->clearParam();
+  groupSyncReadError_->clearParam();
   return true;
 }
 

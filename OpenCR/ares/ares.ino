@@ -93,8 +93,8 @@ void setup()
   pinMode(BATTERY_LED_PIN, OUTPUT);
   digitalWrite(BATTERY_LED_PIN, HIGH);
 
-  pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
-  attachInterrupt(2, emergencyCallback, CHANGE);   // when emergency button is pressed (voltage is falling on the Pin) or released (voltage rising back )
+  //pinMode(EMERGENCY_SWITCH_INTERRUPT_PIN, INPUT_PULLDOWN);
+  //attachInterrupt(2, emergencyCallback, CHANGE);   // when emergency button is pressed (voltage is falling on the Pin) or released (voltage rising back )
   emergency_state = false;
 
   // Init diagnosis
@@ -208,7 +208,7 @@ void loop()
 
 
   motor_driver.readError(motor_error_1, motor_error_2, motor_error_3, motor_error_4);
-  if (motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
+  if(motor_error_1 != 0 || motor_error_2 != 0 || motor_error_3 != 0 || motor_error_4 != 0)
   {
     sprintf(log_msg,  "motor 1 : %d, motor 2 : %d, motor 3 : %d, motor 4 : %d", motor_error_1, motor_error_2, motor_error_3, motor_error_4);
     //char log_msg[50];
@@ -294,7 +294,7 @@ void headlightsCallback(const std_msgs::Bool& headlights_status_msg)
 {
   bool headlights_status = headlights_status_msg.data;
 
-  if (headlights_status == true)
+  if(headlights_status == true)
   {
     digitalWrite(RELAIS_PIN_HEADLIGHTS, LOW);
   }
@@ -309,7 +309,7 @@ void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg)
 {
   bool ventilator_status = ventilator_status_msg.data;
 
-  if (ventilator_status == true)
+  if(ventilator_status == true)
   {
     digitalWrite(RELAIS_PIN_VENTILATOR, HIGH);
   }
@@ -362,7 +362,7 @@ void publishSensorStateMsg(void)
 
   dxl_comm_result = motor_driver.readEncoder(sensor_state_msg.left_rear_encoder, sensor_state_msg.right_rear_encoder, sensor_state_msg.left_front_encoder, sensor_state_msg.right_front_encoder);
 
-  if (dxl_comm_result == true)
+  if(dxl_comm_result == true)
     updateMotorInfo(sensor_state_msg.left_rear_encoder, sensor_state_msg.right_rear_encoder, sensor_state_msg.left_front_encoder, sensor_state_msg.right_front_encoder);
   else
     return;
@@ -405,7 +405,7 @@ void publishBatteryStateMsg(void)
   battery_state_msg.voltage = sensors.checkVoltage();
   battery_state_msg.percentage = (float)(battery_state_msg.voltage / 11.1f);
 
-  if (battery_state == 0)
+  if(battery_state == 0)
     battery_state_msg.present = false;
   else
     battery_state_msg.present = true;
@@ -490,9 +490,9 @@ void publishEnvParametersMesurement(void)
 *******************************************************************************/
 void emergencyCallback (void)
 {
-  if ((long)(micros() - previous_micros) >= debouncing_time)
+  if((long)(micros() - previous_micros) >= debouncing_time)
   {
-    if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
+    if(digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == LOW)
     {
       emergency_state = true; // warning: emergency button was pressed !
     }
@@ -969,7 +969,7 @@ void initOdom(void)
 *******************************************************************************/
 void initJointStates(void)
 {
-  static char *joint_states_name[] = {(char*)"wheel_left__rear_joint", (char*)"wheel_right_rear_joint", (char*)"wheel_left_front_joint", (char*)"wheel_right_front_joint"};
+  static char *joint_states_name[] = {(char*)"left_rear_wheel_joint", (char*)"right_rear_wheel_joint", (char*)"left_front_wheel_joint", (char*)"right_front_wheel_joint"};
 
   joint_states.header.frame_id = joint_state_header_frame_id;
   joint_states.name            = joint_states_name;

@@ -15,7 +15,7 @@
 *******************************************************************************/
 
 /* Authors: Yoonseok Pyo, Leon Jung, Darby Lim, HanCheol Cho */
-/* Modified for ARES Robot: Audric Strumpler */
+/* Modified for ARES Robot: Audric Strumpler, Gabin Pratx */
 
 #include "ares.h"
 
@@ -516,7 +516,9 @@ void publishEmergencyState (void)
       emergency_state_msg.data = emergency_state;
       emergency_state_pub.publish(&emergency_state_msg); //publishing the warning
 
+      previous_button_state = button_state;
       previous_millis = millis();
+
     }
   }
 }

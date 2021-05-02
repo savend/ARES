@@ -66,3 +66,10 @@ cd ~/catkin_ws/
 catkin_make
 
 source ~/.bashrc
+
+
+
+
+crontab -e
+
+@reboot ~/catkin_ws/src/ARES/ares_bringup/launch/ares_robot_bringup.sh

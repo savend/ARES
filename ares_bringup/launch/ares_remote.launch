@@ -3,6 +3,7 @@
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	<arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
   <arg name="teleop_mode" default="keyboard" />
+  <arg name="explore" default="false" />
 
   <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
     <param name="publish_frequency" type="double" value="50.0" />
@@ -33,7 +34,7 @@
 
   <!--*****EXPLORATION******-->
 
-  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen">
+  <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg explore)">
     <param name="robot_base_frame" value="base_link"/>
     <param name="costmap_topic" value="map"/>
     <param name="costmap_updates_topic" value="map_updates"/>

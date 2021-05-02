@@ -1,0 +1,3 @@
+[submodule "m-explore"]
+	path = m-explore
+	url = https://github.com/hrnr/m-explore

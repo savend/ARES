@@ -792,10 +792,6 @@ void driveTest(uint8_t buttons)
     if (abs(saved_tick[RIGHT_REAR] - current_tick[RIGHT_REAR]) <= diff_encoder)
     {
       goal_velocity_from_button[LINEAR]  = 0.05;
-      char log_msg[50];
-      sprintf(log_msg, "In Method driveTest");
-      nh.loginfo(log_msg);
-
       tTime[6] = millis();
     }
     else
@@ -922,7 +918,7 @@ void sendLogMsg(void)
 
   String name             = "ARES";
   String firmware_version = FIRMWARE_VER;
-  String bringup_log      = "This core(v" + firmware_version + ") is compatible with TB3 " + name;
+  String bringup_log      = "This core(v" + firmware_version + ") is compatible with " + name;
 
   const char* init_log_data = bringup_log.c_str();
 

@@ -37,6 +37,7 @@ void setup()
   nh.subscribe(reset_sub);
   nh.subscribe(headlights_status_sub);
   nh.subscribe(ventilator_status_sub);
+  nh.subscribe(reinitialize_motors_status_sub);
 
   nh.advertise(sensor_state_pub);
   nh.advertise(version_info_pub);
@@ -319,6 +320,16 @@ void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg)
 }
 
 /*******************************************************************************
+  Callback function for reinitializing the motors on command
+*******************************************************************************/
+void motorsReinitializationCallback(const std_msgs::Bool& reinitialize_motors_msg)
+{
+  motor_driver.aresReboot(); // reinitialize the motors on command
+  motor_driver.init();
+}
+
+
+/*******************************************************************************
   Publish msgs (CMD Velocity data from RC100 : angular velocity, linear velocity)
 *******************************************************************************/
 void publishCmdVelFromRC100Msg(void)
@@ -510,7 +521,7 @@ void publishEmergencyState (void)
       else if (digitalRead(EMERGENCY_SWITCH_INTERRUPT_PIN) == HIGH)
       {
         motor_driver.aresReboot(); // reinitialize the motors after an emergency stop
-        //motor_driver.init();
+        motor_driver.init();
         emergency_state = false;
       }
       emergency_state_msg.data = emergency_state;

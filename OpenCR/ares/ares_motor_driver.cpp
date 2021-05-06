@@ -148,9 +148,9 @@ bool AresMotorDriver::readEncoder(int32_t &left_rear_value, int32_t &right_rear_
 
   // Get data
   left_rear_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
-  right_rear_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
+  right_rear_value = (-1)*groupSyncReadEncoder_->getData(right_rear_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
   left_front_value  = groupSyncReadEncoder_->getData(left_rear_wheel_id_,  ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
-  right_front_value = groupSyncReadEncoder_->getData(right_rear_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
+  right_front_value = (-1)*groupSyncReadEncoder_->getData(right_rear_wheel_id_, ADDR_X_PRESENT_POSITION, LEN_X_PRESENT_POSITION);
 
 
 

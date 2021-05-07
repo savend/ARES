@@ -1,10 +1,11 @@
+
 #!/usr/bin/env python3
  
 import rospy
 from std_msgs.msg import Float32, Float64, Int32, Bool
 from sensor_msgs.msg import BatteryState,Image
 
-
+import os
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
@@ -16,11 +17,11 @@ from typing import Tuple
 imageWidth = 640
 imageHeight = 480
 
-heightDistanceMessureing = imageHeight * (3/4)
+heightDistanceMessureing = imageHeight * (3 / 4)
 posMid = imageWidth / 2
 posRight = 2 * imageWidth / 3
 posLeft = imageWidth / 3
-TextSpace = 10
+textSpace = 10
 
 pointMid = (int(posMid), int(heightDistanceMessureing))
 pointRight = (int(posRight), int(heightDistanceMessureing))
@@ -30,25 +31,25 @@ pointFRONT = (int(imageWidth / 2), int(imageHeight / 2))
 
 # SensorBox Postions
 boxSpace = 20
-backGround = (57, 58, 54)
-rim = (0, 0, 0)
+background = (57, 58, 54)
+Rim = (0, 0, 0)
 
-sensorBoxWidth = 120
-sensorBoxHeight = 45
-sensorBoxColumRight = boxSpace
-sensorBoxColumLeft: int = imageWidth - sensorBoxWidth - boxSpace
+SensorBox_width = 120
+SensorBox_height = 45
+SensorBoxColum_Right = boxSpace
+SensorBoxColum_Left: int = imageWidth - SensorBox_width - boxSpace
 
-sensorBoxLevel1: int = imageHeight / 2 - 180
-sensorBoxLevel2: int = imageHeight / 2 - 60
-sensorBoxLevel3: int = imageHeight / 2 + 60
-sensorBoxLevel4: int = imageHeight / 2 + 180
+SensorBox_Level_1: int = imageHeight / 2 - 180
+SensorBox_Level_2: int = imageHeight / 2 - 60
+SensorBox_Level_3: int = imageHeight / 2 + 60
+SensorBox_Level_4: int = imageHeight / 2 + 120
 
 # SensorBoxes Information
 
 textType = cv2.FONT_HERSHEY_SIMPLEX
 red = (0, 0, 225)
 textThikness = 2
-texFontSize = 0.5
+texFont_Size = 0.5
 
 
 
@@ -63,15 +64,19 @@ class ImageProcess:
         self.objTemp_data = 0
         self.ambientTemp_data = 0
         self.battery_data = 0
+
+        #absFilePath_Haarcadcade= os.path.abspath('haarcascade.xml')
+        #self.casePath = "/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
         self.casePath = "haarcascade.xml"
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
         #self.img
         #self.depth_img
-        self.distanceMid = 0
-        self.distanceRight = 0
-        self.distanceLeft = 0
-        self.distanceFRONT = 0
+        self.distance_mid = 0
+        self.distance_right = 0
+        self.distance_left = 0
+        self.distance_FRONT = 0
         self.bridge = CvBridge()
+        self.emergencStop_data = 0
 
         self.img_pub= rospy.Publisher("/image", Image, queue_size=10)
 
@@ -82,7 +87,7 @@ class ImageProcess:
         #rospy.Subscriber("env_hum", Float32, self.env_humid_sensor_callback)
         self.ambient_temp_sub = rospy.Subscriber("ambient_temp", Float64, self.ambient_temp_sensor_callback)
         self.obj_temp_sub = rospy.Subscriber("object_temp", Float64, self.obj_temp_sensor_callback)
-        self.emergency_sub = rospy.Subscriber("emergency_button_state", Bool, self.emergency_button_state_callback)
+        self.emergency_sub = rospy.Subscriber("/emergency_button_state", Bool, self.emergency_button_state_callback)
         self.color_frame_sub = rospy.Subscriber("/camera/color/image_raw", Image, self.camera_color_callback) #DepthCamera()
         self.depth_frame_sub = rospy.Subscriber("/camera/depth/image_rect_raw", Image, self.camera_depth_callback) #DepthCamera()
 
@@ -112,6 +117,7 @@ class ImageProcess:
     def emergency_button_state_callback(self,emergencStop_msg):
         self.emergencStop_data=emergencStop_msg.data
 
+
     def camera_color_callback(self, color_msg):
         self.img = self.bridge.imgmsg_to_cv2(color_msg, desired_encoding='bgr8')
         self.img = self.interfaceDrawing(self.img)
@@ -123,10 +129,10 @@ class ImageProcess:
     def camera_depth_callback(self, depth_msg):
         self.depth_img = self.bridge.imgmsg_to_cv2(depth_msg, desired_encoding='passthrough')
 
-        self.distanceMid = round((self.depth_img[pointMid[1], pointMid[0]]) / 10)
-        self.distanceRight = round((self.depth_img[pointRight[1], pointRight[0]]) / 10)
-        self.distanceLeft = round((self.depth_img[pointLeft[1], pointLeft[0]]) / 10)
-        self.distanceFRONT = round((self.depth_img[pointFRONT[1], pointFRONT[0]]) / 10)
+        self.distance_mid = round((self.depth_img[pointMid[1], pointMid[0]]) / 10)
+        self.distance_right = round((self.depth_img[pointRight[1], pointRight[0]]) / 10)
+        self.distance_left = round((self.depth_img[pointLeft[1], pointLeft[0]]) / 10)
+        self.distance_FRONT = round((self.depth_img[pointFRONT[1], pointFRONT[0]]) / 10)
 
 
     def peopleRecnognition(self, img):
@@ -154,58 +160,60 @@ class ImageProcess:
                 
 
                 # print('Right: ' , self.distance_right , '; MID ' , self.distance_mid , '; Left' , self.distance_left)
-                cv2.putText(img, str(self.distanceMid) + "cm", (int(posMid + TextSpace), int(heightDistanceMessureing)), textType,
-                            texFontSize, red, textThikness)
-                cv2.putText(img, str(self.distanceRight) + "cm", (int(posRight + TextSpace), int(heightDistanceMessureing)),
-                            textType, texFontSize, red, textThikness)
-                cv2.putText(img, str(self.distanceLeft) + "cm", (int(posLeft + TextSpace), int(heightDistanceMessureing)), textType,
-                            texFontSize, red, textThikness)
+                cv2.putText(img, str(self.distance_mid) + "cm", (int(posMid + textSpace), int(heightDistanceMessureing)), textType,
+                            texFont_Size, red, textThikness)
+                cv2.putText(img, str(self.distance_right) + "cm", (int(posRight + textSpace), int(heightDistanceMessureing)),
+                            textType, texFont_Size, red, textThikness)
+                cv2.putText(img, str(self.distance_left) + "cm", (int(posLeft + textSpace), int(heightDistanceMessureing)), textType,
+                            texFont_Size, red, textThikness)
 
                 # Box for TEMP_Front
-                cv2.rectangle(img, (sensorBoxColumRight, int(sensorBoxLevel2)),
-                              (sensorBoxColumRight + sensorBoxWidth, int(sensorBoxLevel2) + sensorBoxHeight), rim, 3, )
-                cv2.rectangle(img, (sensorBoxColumRight, int(sensorBoxLevel2)),
-                              (sensorBoxColumRight + sensorBoxWidth, int(sensorBoxLevel2) + sensorBoxHeight),
-                              backGround, -1, )
+                cv2.rectangle(img, (SensorBoxColum_Right, int(SensorBox_Level_2)),
+                              (SensorBoxColum_Right + SensorBox_width, int(SensorBox_Level_2) + SensorBox_height), Rim, 3, )
+                cv2.rectangle(img, (SensorBoxColum_Right, int(SensorBox_Level_2)),
+                              (SensorBoxColum_Right + SensorBox_width, int(SensorBox_Level_2) + SensorBox_height),
+                              background, -1, )
 
-                cv2.putText(img, str(self.objTemp_data),
-                            (sensorBoxColumRight + TextSpace, (int(sensorBoxLevel2) + sensorBoxHeight - TextSpace)),
-                            cv2.FONT_HERSHEY_SIMPLEX, texFontSize, red, textThikness)
+
+
+                cv2.putText(img, str(round(self.objTemp_data,2)),
+                            (SensorBoxColum_Right + textSpace, (int(SensorBox_Level_2) + SensorBox_height - textSpace)),
+                            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for DIstanz_Front
-                cv2.rectangle(img, (sensorBoxColumRight, int(sensorBoxLevel3)),
-                              (sensorBoxColumRight + sensorBoxWidth, int(sensorBoxLevel3) + sensorBoxHeight), rim, 3, )
-                cv2.rectangle(img, (sensorBoxColumRight, int(sensorBoxLevel3)),
-                              (sensorBoxColumRight + sensorBoxWidth, int(sensorBoxLevel3) + sensorBoxHeight),
-                              backGround, -1, )
+                cv2.rectangle(img, (SensorBoxColum_Right, int(SensorBox_Level_3)),
+                              (SensorBoxColum_Right + SensorBox_width, int(SensorBox_Level_3) + SensorBox_height), Rim, 3, )
+                cv2.rectangle(img, (SensorBoxColum_Right, int(SensorBox_Level_3)),
+                              (SensorBoxColum_Right + SensorBox_width, int(SensorBox_Level_3) + SensorBox_height),
+                              background, -1, )
 
                 cv2.circle(img, pointFRONT, 6, (0, 0, 255), 3)
 
-                cv2.putText(img, str(self.distanceFRONT) + "cm",
-                            (sensorBoxColumRight + TextSpace, (int(sensorBoxLevel3) + sensorBoxHeight - TextSpace)),
-                            cv2.FONT_HERSHEY_SIMPLEX, texFontSize, red, textThikness)
+                cv2.putText(img, str(self.distance_FRONT) + "cm",
+                            (SensorBoxColum_Right + textSpace, (int(SensorBox_Level_3) + SensorBox_height - textSpace)),
+                            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for O2 Robot
-                cv2.rectangle(img, (sensorBoxColumLeft, int(sensorBoxLevel2)),
-                              (sensorBoxColumLeft + sensorBoxWidth, int(sensorBoxLevel2) + sensorBoxHeight), rim, 3, )
-                cv2.rectangle(img, (sensorBoxColumLeft, int(sensorBoxLevel2)),
-                              (sensorBoxColumLeft + sensorBoxWidth, int(sensorBoxLevel2) + sensorBoxHeight), backGround,
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_2)),
+                              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_2) + SensorBox_height), Rim, 3, )
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_2)),
+                              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_2) + SensorBox_height), background,
                               -1, )
 
-                cv2.putText(img, str(self.o2_data),
-                            (sensorBoxColumLeft, (int(sensorBoxLevel2) + sensorBoxHeight - TextSpace)),
-                            cv2.FONT_HERSHEY_SIMPLEX, texFontSize, red, textThikness)
+                cv2.putText(img, str(round(self.o2_data,2)),
+                            (SensorBoxColum_Left, (int(SensorBox_Level_2) + SensorBox_height - textSpace)),
+                            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for TEMP Robot
-                cv2.rectangle(img, (sensorBoxColumLeft, int(sensorBoxLevel3)),
-                              (sensorBoxColumLeft + sensorBoxWidth, int(sensorBoxLevel3) + sensorBoxHeight), rim, 3, )
-                cv2.rectangle(img, (sensorBoxColumLeft, int(sensorBoxLevel3)),
-                              (sensorBoxColumLeft + sensorBoxWidth, int(sensorBoxLevel3) + sensorBoxHeight), backGround,
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_3)),
+                              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_3) + SensorBox_height), Rim, 3, )
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_3)),
+                              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_3) + SensorBox_height), background,
                               -1, )
 
-                cv2.putText(img, str(self.ambientTemp_data),
-                            (sensorBoxColumLeft, (int(sensorBoxLevel3) + sensorBoxHeight - TextSpace)),
-                            cv2.FONT_HERSHEY_SIMPLEX, texFontSize, red, textThikness)
+                cv2.putText(img, str(round(self.ambientTemp_data,2)),
+                            (SensorBoxColum_Left, (int(SensorBox_Level_3) + SensorBox_height - textSpace)),
+                            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for Humidity Robot
                 #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_1)),
@@ -229,17 +237,25 @@ class ImageProcess:
                 #            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for Batterie
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,-1, )
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
+                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,-1, )
 
-                #cv2.putText(img, str(self.envPressure_data),(SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - TextSpace)),cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
+                cv2.putText(img, str(round(self.battery_data,2)) + " Volt", (SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - textSpace)), cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
- 
+                #Warning EmergencyStop
+
+                if self.emergencStop_data == True:
+                    #cv2.rectangle(self.img, (SensorBoxColum_Left, int(SensorBox_Level_1)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_1) + SensorBox_height), background,-1, )
+                    cv2.putText(img, str("Emergency-STOP"), (150 , int(imageHeight / 2 + 10)), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,0), 3)
+
+                #if self.emergencStop_data is True:
+                #    cv2.putText(img,str("Motors are OFF"),(int(image_width/2), int(image_height/2),cv2.FONT_HERSHEY_SIMPLEX, 14, red, 5))
 
                 # Box for Signalstärke
 
                 # LOGO ARES
-                LogoAres = cv2.imread('ARESLOGO_Black.jpg')
+                #LogoAres = cv2.imread('/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/ARESLOGO_Black_tiny.jpg')
+                LogoAres = cv2.imread('ARESLOGO_Black_tiny.jpg')
                 if LogoAres is None:
                     rospy.loginfo("error")
                 h_LoGo = LogoAres.shape[0]
@@ -253,37 +269,6 @@ class ImageProcess:
                 img[boxSpace: h_roi, boxSpace: w_roi] = combine
 
                 return img
-
-                # Liitle ARES
-                #    p1 = (1140, 40)
-                #    p2 = (1140, 70)
-                #    p3 = (1130, 55)
-                #    p4 = (1130, 65)
-                #    p5 = (1220, 70)
-                #    p6 = (1220, 40)
-                #    p7 = (1230, 55)
-                #    p8 = (1230, 65)
-                #    p9 = (1160, 70)
-                #    p10 =(1200, 70)
-                #    cv2.rectangle(color_frame, p1, p5, (0, 0, 225), cv2.FILLED)
-                #    cv2.rectangle(color_frame, p1, p5, (0, 0, 0), 3, )
-                #    cv2.circle(color_frame, p9,10, (0, 0, 255),cv2.FILLED)
-                #    cv2.circle(color_frame, p10,10, (0, 0, 255), cv2.FILLED)
-                #    cv2.circle(color_frame, (p9), 10, (0, 0, 0), 5)
-                #    cv2.circle(color_frame, (p10), 10, (0, 0, 0), 5)
-                #    cv2.line(color_frame, p1, p3, (0, 0, 0), 3)
-                #    cv2.line(color_frame, p3, p4, (0, 0, 0), 3)
-                #    cv2.line(color_frame, p4, p2, (0, 0, 0), 3)
-                #    cv2.line(color_frame, p6, p7, (0, 0, 0), 3)
-                #    cv2.line(color_frame, p7, p8, (0, 0, 0), 3)
-                #    cv2.line(color_frame, p8, p5, (0, 0, 0), 3)
-
-                # Battery DIsplay
-
-                # cv2.imshow("depth frame", depth_frame)
-
-
-
 
 
 
@@ -317,3 +302,4 @@ if __name__ == '__main__':
         pass
     #finally:
         #
+

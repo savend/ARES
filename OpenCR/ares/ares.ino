@@ -156,7 +156,6 @@ void loop()
     publishSensorStateMsg();
     publishBatteryStateMsg();
     publishDriveInformation();
-    publishO2Mesurement();
     publishIRtempMesurement();
     tTime[2] = t;
   }
@@ -171,6 +170,7 @@ void loop()
   if ((t - tTime[4]) >= (1000 / VERSION_INFORMATION_PUBLISH_FREQUENCY))
   {
     publishVersionInfoMsg();
+    publishO2Mesurement();
     tTime[4] = t;
   }
 

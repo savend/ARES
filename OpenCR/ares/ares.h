@@ -158,6 +158,7 @@ void motorPowerCallback(const std_msgs::Bool& power_msg);
 void resetCallback(const std_msgs::Empty& reset_msg);
 void headlightsCallback(const std_msgs::Bool& headlights_status_msg);
 void ventilatorCallback(const std_msgs::Bool& ventilator_status_msg);
+void motorsReinitializationCallback(const std_msgs::Bool& reinitialize_motors_msg);
 
 // Function prototypes
 void publishCmdVelFromRC100Msg(void);
@@ -232,6 +233,8 @@ ros::Subscriber<std_msgs::Empty> reset_sub("reset", resetCallback);
 ros::Subscriber<std_msgs::Bool> headlights_status_sub("headlights_status", headlightsCallback);
 
 ros::Subscriber<std_msgs::Bool> ventilator_status_sub("ventilator_status", ventilatorCallback);
+
+ros::Subscriber<std_msgs::Bool> reinitialize_motors_status_sub("reinitialize_motors_status", motorsReinitializationCallback);
 
 /*******************************************************************************
 * Publisher

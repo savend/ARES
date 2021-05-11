@@ -66,8 +66,8 @@ class ImageProcess:
         self.battery_data = 0
 
         #absFilePath_Haarcadcade= os.path.abspath('haarcascade.xml')
-        #self.casePath = "/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
-        self.casePath = "haarcascade.xml"
+        self.casePath = "/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
+        #self.casePath = "haarcascade.xml"
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
         #self.img
         #self.depth_img
@@ -82,9 +82,6 @@ class ImageProcess:
 
         self.o2_sub = rospy.Subscriber("o2_concentration", Float32,self.o2_sensor_callback)
         self.battery_sub = rospy.Subscriber("battery_state", BatteryState, self.batteryState_callback)
-        #self.env_temp_sub = rospy.Subscriber("env_temp", Float32, self.env_temp_sensor_callback)
-        #rospy.Subscriber("env_pres", Int32, self.env_pressure_sensor_callback)
-        #rospy.Subscriber("env_hum", Float32, self.env_humid_sensor_callback)
         self.ambient_temp_sub = rospy.Subscriber("ambient_temp", Float64, self.ambient_temp_sensor_callback)
         self.obj_temp_sub = rospy.Subscriber("object_temp", Float64, self.obj_temp_sensor_callback)
         self.emergency_sub = rospy.Subscriber("/emergency_button_state", Bool, self.emergency_button_state_callback)
@@ -99,14 +96,6 @@ class ImageProcess:
     def batteryState_callback(self,battery_msg):
         self.battery_data = battery_msg.voltage
 
-    #def env_temp_sensor_callback(self,envTemp_msg):
-    #   env_Temp_data=envTemp_msg.data
-
-    #def env_pressure_sensor_callback(self,envPressure_msg):
-    #    envPressure_data=envPressure_msg.data
-
-    #def env_humid_sensor_callback(self,envHumid_msg):
-    #    envHumid_data=envHumid_msg.data
 
     def ambient_temp_sensor_callback(self,ambientTemp_msg):
         self.ambientTemp_data=ambientTemp_msg.data
@@ -215,58 +204,38 @@ class ImageProcess:
                             (SensorBoxColum_Left, (int(SensorBox_Level_3) + SensorBox_height - textSpace)),
                             cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
-                # Box for Humidity Robot
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_1)),
-                #              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_1) + SensorBox_height), Rim, 3, )
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_1)),
-                #              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_1) + SensorBox_height), background,
-                #              -1, )
-                #cv2.putText(img, str(self.envHumid_data),
-                #            (SensorBoxColum_Left, (int(SensorBox_Level_1) + SensorBox_height - TextSpace)),
-                #            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
-
-                # Box for Pressure Robot
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),
-                #              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
-                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),
-                #              (SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,
-                #              -1, )
-
-                #cv2.putText(img, str(self.envPressure_data),
-                #            (SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - TextSpace)),
-                #            cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 # Box for Batterie
-                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
-                cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,-1, )
+                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), Rim, 3, )
+                #cv2.rectangle(img, (SensorBoxColum_Left, int(SensorBox_Level_4)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_4) + SensorBox_height), background,-1, )
 
-                cv2.putText(img, str(round(self.battery_data,2)) + " Volt", (SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - textSpace)), cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
+                #cv2.putText(img, str(round(self.battery_data,2)) + " Volt", (SensorBoxColum_Left, (int(SensorBox_Level_4) + SensorBox_height - textSpace)), cv2.FONT_HERSHEY_SIMPLEX, texFont_Size, red, textThikness)
 
                 #Warning EmergencyStop
 
-                if self.emergencStop_data == True:
+                #if self.emergencStop_data == True:
                     #cv2.rectangle(self.img, (SensorBoxColum_Left, int(SensorBox_Level_1)),(SensorBoxColum_Left + SensorBox_width, int(SensorBox_Level_1) + SensorBox_height), background,-1, )
-                    cv2.putText(img, str("Emergency-STOP"), (150 , int(imageHeight / 2 + 10)), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,0), 3)
+                #    cv2.putText(img, str("Emergency-STOP"), (150 , int(imageHeight / 2 + 10)), cv2.FONT_HERSHEY_SIMPLEX, 1.5, (255,0,0), 3)
 
-                #if self.emergencStop_data is True:
-                #    cv2.putText(img,str("Motors are OFF"),(int(image_width/2), int(image_height/2),cv2.FONT_HERSHEY_SIMPLEX, 14, red, 5))
+
+
 
                 # Box for Signalstärke
 
                 # LOGO ARES
                 #LogoAres = cv2.imread('/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/ARESLOGO_Black_tiny.jpg')
-                LogoAres = cv2.imread('ARESLOGO_Black_tiny.jpg')
-                if LogoAres is None:
-                    rospy.loginfo("error")
-                h_LoGo = LogoAres.shape[0]
-                w_logo = LogoAres.shape[1]
+                ##LogoAres = cv2.imread('ARESLOGO_Black_tiny.jpg')
+                #if LogoAres is None:
+                #    rospy.loginfo("error")
+                #h_LoGo = LogoAres.shape[0]
+                #w_logo = LogoAres.shape[1]
                 #h_LoGo, w_logo, _ = LogoAres.shape
-                h_roi: int = (boxSpace + int(h_LoGo))
-                w_roi: int = (boxSpace + int(w_logo))
+                #h_roi: int = (boxSpace + int(h_LoGo))
+                #w_roi: int = (boxSpace + int(w_logo))
 
-                roi = img[boxSpace: h_roi, boxSpace: w_roi]
-                combine = cv2.addWeighted(roi, 1, LogoAres, 0.5, 0)
-                img[boxSpace: h_roi, boxSpace: w_roi] = combine
+                #roi = img[boxSpace: h_roi, boxSpace: w_roi]
+                #combine = cv2.addWeighted(roi, 1, LogoAres, 0.5, 0)
+                #img[boxSpace: h_roi, boxSpace: w_roi] = combine
 
                 return img
 

@@ -66,8 +66,10 @@ class ImageProcess:
         self.battery_data = 0
 
         #absFilePath_Haarcadcade= os.path.abspath('haarcascade.xml')
+
         self.casePath = "/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
         #self.casePath = "haarcascade.xml"
+
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
         #self.img
         #self.depth_img
@@ -224,11 +226,13 @@ class ImageProcess:
 
                 # LOGO ARES
                 #LogoAres = cv2.imread('/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/ARESLOGO_Black_tiny.jpg')
+
                 ##LogoAres = cv2.imread('ARESLOGO_Black_tiny.jpg')
                 #if LogoAres is None:
                 #    rospy.loginfo("error")
                 #h_LoGo = LogoAres.shape[0]
                 #w_logo = LogoAres.shape[1]
+
                 #h_LoGo, w_logo, _ = LogoAres.shape
                 #h_roi: int = (boxSpace + int(h_LoGo))
                 #w_roi: int = (boxSpace + int(w_logo))

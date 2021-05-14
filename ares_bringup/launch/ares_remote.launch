@@ -2,7 +2,7 @@
 	<arg name="model" default="$(find ares_description)/urdf/ares.urdf.xacro"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	<arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
-  <arg name="jsPort" default="js0" />
+  <arg name="jsPort" default="js1" />
   <arg name="explore" default="false" />
 
 
@@ -35,13 +35,14 @@
 
     <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch" />
     <node name="web_video_server" pkg="web_video_server" type="web_video_server" />
+    <node name="robot_pose_publisher" pkg="robot_pose_publisher" type="robot_pose_publisher" />
 
 
 
   <!--******TELEOP*******-->
 
     <include file="$(find teleop_twist_joy)/launch/teleop.launch">
-      <arg name="joy_dev" value="/dev/input/$(arg jsPort)" />
+      <arg name="joy_dev" value="/dev/input/js1" />
     </include>
 
     <!--   <node pkg="teleop_twist_joy" type="ares_teleop" if="$(eval teleop_mode == 'keyboard')" output="screen" launch-prefix="xtrem -e"/>
@@ -63,7 +64,7 @@
 
   <!--*****EXPLORATION******-->
 
-    <!-- <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg explore)">
+    <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg explore)">
       <param name="robot_base_frame" value="base_link"/>
       <param name="costmap_topic" value="map"/>
       <param name="costmap_updates_topic" value="map_updates"/>
@@ -74,10 +75,10 @@
       <param name="orientation_scale" value="0.0"/>
       <param name="gain_scale" value="1.0"/>
       <param name="transform_tolerance" value="0.3"/>
-      <param name="min_frontier_size" value="0.75"/>
-    </node> -->
+      <param name="min_frontier_size" value="1.5"/>
+    </node>
 
-    <node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg explore)">
+    <!--<node pkg="explore_lite" type="explore" respawn="false" name="explore" output="screen" if="$(arg explore)">
       <param name="robot_base_frame" value="base_link"/>
       <param name="costmap_topic" value="move_base/global_costmap/costmap"/>
       <param name="costmap_updates_topic" value="move_base/global_costmap/costmap_updates"/>
@@ -89,6 +90,6 @@
       <param name="gain_scale" value="1.0"/>
       <param name="transform_tolerance" value="0.3"/>
       <param name="min_frontier_size" value="0.1"/>
-    </node>
+    </node>-->
 
 </launch>

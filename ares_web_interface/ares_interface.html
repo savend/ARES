@@ -54,24 +54,24 @@
 			host : 'localhost',
 			width : 640,
 			height : 480,
-			topic : '/camera/image_raw'
+			topic : '/camera/color/image_raw'
 		});
 
-		//Setup Topic
-		var listener = new ROSLIB.Topic({
-			ros : ros,
-			name : '/joint_states',
-			messageType : 'sensor_msgs/JointState'
-		});
+		// //Setup Topic
+		// var listener = new ROSLIB.Topic({
+		// 	ros : ros,
+		// 	name : '/joint_states',
+		// 	messageType : 'sensor_msgs/JointState'
+		// });
 
-		//Refresh Topic
-		function joint_topic(){
-			listener.subscribe(function(message) {
-				document.getElementById("joint").innerHTML = message.header.seq;
-				listener.unsubscribe();
-			});
-		}
-		setInterval(joint_topic, 10) //Refresh Topic all 10ms
+		// //Refresh Topic
+		// function joint_topic(){
+		// 	listener.subscribe(function(message) {
+		// 		document.getElementById("joint").innerHTML = message.header.seq;
+		// 		listener.unsubscribe();
+		// 	});
+		// }
+		// setInterval(joint_topic, 10) //Refresh Topic all 10ms
 
 		// Object_Temp Setup
 		var listener_ObjTemp = new ROSLIB.Topic({
@@ -83,7 +83,7 @@
 		//Refresh Topic
 		function ObjTemp_topic(){
 			listener_ObjTemp.subscribe(function(message) {
-				document.getElementById("Object_Temp_TextID").innerHTML = message.header.data;
+				document.getElementById("Object_Temp_TextID").innerHTML = message.data;
 				listener_ObjTemp.unsubscribe();
 			});
 		}
@@ -100,7 +100,7 @@
 		//Refresh Topic
 		function AmbientTemp_topic(){
 			listener_AmbTemp.subscribe(function(message) {
-				document.getElementById("AmbTemp_TextID").innerHTML = message.header.data;
+				document.getElementById("AmbTemp_TextID").innerHTML = message.data;
 				listener_AmbTemp.unsubscribe();
 			});
 		}
@@ -116,7 +116,7 @@
 		//Refresh Topic O2
 		function O2_topic(){
 			listener_O2.subscribe(function(message) {
-				document.getElementById("O2_TextID").innerHTML = message.header.data;
+				document.getElementById("O2_TextID").innerHTML = message.data;
 				listener_O2.unsubscribe();
 			});
 		}
@@ -133,7 +133,7 @@
 		//Refresh Topic Batterystate
 		function BatteryState_topic(){
 			listener_Battery.subscribe(function(message) {
-				document.getElementById("Battery_TextID").innerHTML = message.header.voltage;
+				document.getElementById("Battery_TextID").innerHTML = message.voltage;
 				listener_Battery.unsubscribe();
 			});
 		}

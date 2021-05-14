@@ -48,11 +48,13 @@ struct TeleopTwistJoy::Impl
   void sendCmdVelMsg(const sensor_msgs::Joy::ConstPtr& joy_msg, const std::string& which_map);
   void reininitialize_motors_status_publisher(std_msgs::Bool button_start);
   void headlight_publisher(std_msgs::Bool button_y);
+  void autonomous_publisher(std_msgs::Bool button_a);
 
   ros::Subscriber joy_sub;
   ros::Publisher cmd_vel_pub;
   ros::Publisher headlights_status_pub;
   ros::Publisher reininitialize_motors_status_pub;
+  ros::Publisher explore_control_pub;
 
   int enable_button;
   int enable_turbo_button;
@@ -81,6 +83,8 @@ TeleopTwistJoy::TeleopTwistJoy(ros::NodeHandle* nh, ros::NodeHandle* nh_param)
   pimpl_->cmd_vel_pub = nh->advertise<geometry_msgs::Twist>("cmd_vel", 1, true);
   pimpl_->headlights_status_pub = nh->advertise<std_msgs::Bool>("headlights_status", 1, true);
   pimpl_->reininitialize_motors_status_pub = nh->advertise<std_msgs::Bool>("reininitialize_motors_status", 1, true);
+  pimpl_->explore_control_pub = nh->advertise<std_msgs::Bool>("explore_control", 1, true);
+
   pimpl_->joy_sub = nh->subscribe<sensor_msgs::Joy>("joy", 1, &TeleopTwistJoy::Impl::joyCallback, pimpl_);
 
   nh_param->param<int>("enable_button", pimpl_->enable_button, 0);
@@ -217,17 +221,44 @@ void TeleopTwistJoy::Impl::reininitialize_motors_status_publisher(std_msgs::Bool
   }
 }
 
+void TeleopTwistJoy::Impl::autonomous_publisher(std_msgs::Bool button_a){
+  std_msgs::Bool explore_control;
+
+  static bool prev_explore_state = false;
+  static bool prev_button_signal_explore = false;
+  
+  if(button_a.data != prev_button_signal_explore){
+
+    if(button_a.data == true && prev_explore_state == false){
+      explore_control.data = true;
+      prev_explore_state = true;
+      explore_control_pub.publish(explore_control);
+    }
+
+    else if (button_a.data == true && prev_explore_state == true){
+      explore_control.data = false;
+      prev_explore_state = false;
+      explore_control_pub.publish(explore_control);
+    }
+    prev_button_signal_explore = button_a.data;
+  }
+}
+
 void TeleopTwistJoy::Impl::joyCallback(const sensor_msgs::Joy::ConstPtr& joy_msg)
 {
 
   std_msgs::Bool button_y;
   std_msgs::Bool button_start;
+  std_msgs::Bool button_a;
 
   button_y.data = joy_msg->buttons[0];
   TeleopTwistJoy::Impl::headlight_publisher(button_y);
 
   button_start.data = joy_msg->buttons[9];
   TeleopTwistJoy::Impl::reininitialize_motors_status_publisher(button_start);
+
+  button_a.data = joy_msg->buttons[2];
+  TeleopTwistJoy::Impl::autonomous_publisher(button_a);
 
   if (enable_turbo_button >= 0 &&
       joy_msg->buttons.size() > enable_turbo_button &&

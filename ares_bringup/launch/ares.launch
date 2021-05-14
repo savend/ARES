@@ -15,7 +15,9 @@
 
   <node pkg="ares_bringup" type="ares_diagnostics" name="ares_diagnostics" output="screen"/>
 
-  <include file="$(find realsense2_camera)/launch/rs_camera.launch" />
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch" >
+    <arg name="filters" value="pointcloud" />
+  </include>
 
 
 <!--

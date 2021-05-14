@@ -22,7 +22,7 @@
 		<param name="occupancy_max_z" value="0.15" />
 		
 		<!-- data source to integrate (PointCloud2) -->
-		<remap from="cloud_in" to="camera/depth/points" />
+		<remap from="cloud_in" to="/camera/depth/color/points" />
 	
 	</node>
 </launch>

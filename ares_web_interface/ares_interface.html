@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8" />
 
+<link rel="stylesheet" type="text/css" href="style.css">
+
+
 <!-- <script type="text/javascript" src="http://static.robotwebtools.org/EaselJS/current/easeljs.min.js"></script>
 <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
 <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
@@ -77,10 +80,43 @@
 
 	<h1>ARES Interface Example</h1>
 
-	<h3 id="joint">joint_states Topic</h3>
+			
 
-	<div id="nav"></div>
+	<div>
 
-	<div id="mjpeg"></div>
+		<div id="Stream">
+
+			<h3>Stream ARES</h3>
+			<div id="mjpeg"></div>
+		</div>
+
+			
+		<div id="Map">
+			
+			<h3>Map ARES</h3>
+			<div id="nav"></div>
+		</div>	
+			
+			
+
+		
+
+		<!--
+
+		<div id="sensorBoxTempAlip">tempAlip;</div>
+				
+			
+		<div id="sensorBoxTempAres">tempAres;</div>
+
+		
+		<div id="sensorBoxDistanceFront">distanceFront;</div>	
+
+		-->
+	</div>
+
+	<div id="sensorBoxO2">o2-Werte;</div>
+	
 </body>
+
+
 </html>

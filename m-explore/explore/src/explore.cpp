@@ -68,6 +68,8 @@ Explore::Explore()
   private_nh_.param("orientation_scale", orientation_scale_, 0.0);
   private_nh_.param("gain_scale", gain_scale_, 1.0);
   private_nh_.param("min_frontier_size", min_frontier_size, 0.5);
+  ros::NodeHandle nh;
+  explore_control_sub = nh.subscribe("explore_control", 10, &Explore::exploreControlCallback, this);
 
   search_ = frontier_exploration::FrontierSearch(costmap_client_.getCostmap(),
                                                  potential_scale_, gain_scale_,
@@ -85,6 +87,9 @@ Explore::Explore()
   exploring_timer_ =
       relative_nh_.createTimer(ros::Duration(1. / planner_frequency_),
                                [this](const ros::TimerEvent&) { makePlan(); });
+  stop();
+  ROS_DEBUG("Exploration stopped by user");
+  
 }
 
 Explore::~Explore()
@@ -292,16 +297,37 @@ void Explore::stop()
   ROS_INFO("Exploration stopped.");
 }
 
+void Explore::exploreControlCallback(const std_msgs::Bool& explore_control_msg)
+{
+  if(explore_control_msg.data)
+  {
+    start();
+    ROS_DEBUG("Exploration started by user");
+  } 
+  else
+  {
+    stop();
+    ROS_DEBUG("Exploration stopped by user");
+  }
+}
+
 }  // namespace explore
+
+
 
 int main(int argc, char** argv)
 {
   ros::init(argc, argv, "explore");
+  
+
   if (ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME,
                                      ros::console::levels::Debug)) {
     ros::console::notifyLoggerLevelsChanged();
   }
   explore::Explore explore;
+  //ros::NodeHandle nh;
+  //ros::Subscriber explore_control_sub = nh.subscribe("explore_control", 10, explore::Explore::exploreControlCallback, explore);
+
   ros::spin();
 
   return 0;

@@ -302,12 +302,12 @@ void Explore::exploreControlCallback(const std_msgs::Bool& explore_control_msg)
   if(explore_control_msg.data)
   {
     start();
-    ROS_DEBUG("Exploration started by user");
+    ROS_WARN("Exploration started by user");
   } 
   else
   {
     stop();
-    ROS_DEBUG("Exploration stopped by user");
+    ROS_WARN("Exploration stopped by user");
   }
 }
 

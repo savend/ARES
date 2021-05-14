@@ -73,17 +73,6 @@ void setup()
     nh.loginfo(log_msg);
   }
 
-  if (!env_sensor.begin())
-  {
-    sprintf(log_msg, "Could not find a valid BME680 environment sensor, check wiring!");
-    nh.loginfo(log_msg);
-  }
-  env_sensor.setTemperatureOversampling(BME680_OS_8X);
-  env_sensor.setHumidityOversampling(BME680_OS_2X);
-  env_sensor.setPressureOversampling(BME680_OS_4X);
-  env_sensor.setIIRFilterSize(BME680_FILTER_SIZE_3);
-  env_sensor.setGasHeater(320, 150); // 320*C for 150 ms
-
   // Digital PinMode declaration on the OpenCR
   pinMode(RELAIS_PIN_HEADLIGHTS, OUTPUT);
   digitalWrite(RELAIS_PIN_HEADLIGHTS, HIGH);
@@ -156,7 +145,6 @@ void loop()
     publishSensorStateMsg();
     publishBatteryStateMsg();
     publishDriveInformation();
-    publishIRtempMesurement();
     tTime[2] = t;
   }
 
@@ -171,6 +159,7 @@ void loop()
   {
     publishVersionInfoMsg();
     publishO2Mesurement();
+    publishIRtempMesurement();
     tTime[4] = t;
   }
 

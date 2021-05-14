@@ -60,7 +60,7 @@ bool DFRobot_OxygenSensor::begin(uint8_t addr)
 void DFRobot_OxygenSensor::ReadFlash()
 {
   uint8_t value = 0;
-  static long previousT = millis();
+  //static long previousT = millis();
   Wire.beginTransmission(_addr);
   Wire.write(GET_KEY_REGISTER);
   Wire.endTransmission();
@@ -73,7 +73,7 @@ void DFRobot_OxygenSensor::ReadFlash()
   } else {
     this->_Key = (float)value / 1000.0;
   }
-  previousT = millis();
+  //previousT = millis();
 }
 
 /* Write data to the i2c register  */
@@ -101,7 +101,7 @@ float DFRobot_OxygenSensor::ReadOxygenData(uint8_t CollectNum)
 {
   uint8_t rxbuf[10] = {0}, k = 0;
   static uint8_t i = 0 , j = 0;
-  static long previousT = millis();
+  //static long previousT = millis();
   ReadFlash();
   if (CollectNum > 0) {
     for (j = CollectNum - 1;  j > 0; j--) {

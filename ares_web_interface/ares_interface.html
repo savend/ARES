@@ -72,49 +72,137 @@
 			});
 		}
 		setInterval(joint_topic, 10) //Refresh Topic all 10ms
+
+		// Object_Temp Setup
+		var listener_ObjTemp = new ROSLIB.Topic({
+			ros : ros,
+			name : '/object_temp',
+			messageType : 'std_msgs/Float64'
+		});
+
+		//Refresh Topic
+		function ObjTemp_topic(){
+			listener_ObjTemp.subscribe(function(message) {
+				document.getElementById("Object_Temp_TextID").innerHTML = message.header.data;
+				listener_ObjTemp.unsubscribe();
+			});
+		}
+
+		setInterval(ObjTemp_topic, 1000) //Refresh Topic all 10ms
+
+		// Ambient_Temp Setup
+		var listener_AmbTemp = new ROSLIB.Topic({
+			ros : ros,
+			name : '/ambient_temp',
+			messageType : 'std_msgs/Float64'
+		});
+
+		//Refresh Topic
+		function AmbientTemp_topic(){
+			listener_AmbTemp.subscribe(function(message) {
+				document.getElementById("AmbTemp_TextID").innerHTML = message.header.data;
+				listener_AmbTemp.unsubscribe();
+			});
+		}
+		setInterval(AmbientTemp_topic, 1000) //Refresh Topic all 10ms
+
+		// O2 Setup
+		var listener_O2 = new ROSLIB.Topic({
+			ros : ros,
+			name : '/o2_concentration',
+			messageType : 'std_msgs/Float32'
+		});
+
+		//Refresh Topic O2
+		function O2_topic(){
+			listener_O2.subscribe(function(message) {
+				document.getElementById("O2_TextID").innerHTML = message.header.data;
+				listener_O2.unsubscribe();
+			});
+		}
+
+		setInterval(O2_topic, 1000) //Refresh Topic all 10ms
+
+		// Battery Setup
+		var listener_Battery = new ROSLIB.Topic({
+			ros : ros,
+			name : '/battery_state',
+			messageType : 'sensor_msgs/BatteryState'
+		});
+
+		//Refresh Topic Batterystate
+		function BatteryState_topic(){
+			listener_Battery.subscribe(function(message) {
+				document.getElementById("Battery_TextID").innerHTML = message.header.voltage;
+				listener_Battery.unsubscribe();
+			});
+		}
+
+		setInterval(BatteryState_topic, 1000) //Refresh Topic all 10ms
 	}
 </script>
 </head>
 
 <body onload="init()">
 
-	<h1>ARES Interface Example</h1>
 
+
+	<header>
+		<h1>Remote Controll-Deck </h1>
+	</header>
 			
 
-	<div>
+	<div class="container_visualisation">
 
-		<div id="Stream">
+		<div class="container_stream">
 
 			<h3>Stream ARES</h3>
 			<div id="mjpeg"></div>
 		</div>
 
 			
-		<div id="Map">
+		<div class="container_map">
 			
 			<h3>Map ARES</h3>
 			<div id="nav"></div>
 		</div>	
 			
-			
+	</div>		
 
+
+	<div class="container_visualisation">
 		
 
-		<!--
+		<div class= "sensor_Box">
+									
+			<h4> O2 WERT [%] </h4>
+			<h5 id= "O2_TextID"> No Data</h5>
 
-		<div id="sensorBoxTempAlip">tempAlip;</div>
-				
+		</div>
+
+
+		<div class="sensor_Box">
+
+			<h4> OBjTemp [°C]</h4>
+			<h5 id="Object_Temp_TextID"> No Data </h5>
 			
-		<div id="sensorBoxTempAres">tempAres;</div>
+		</div>
 
-		
-		<div id="sensorBoxDistanceFront">distanceFront;</div>	
+		<div class="sensor_Box">
 
-		-->
+			<h4> AmbientTemp [°C]</h4>
+			<h5 id ="AmbTemp_TextID"> No Data</h5>
+			
+		</div>
+
+		<div class="sensor_Box">
+
+			<h4> Battery [Volts]</h4>
+			<h5 id= "Battery_TextID"> No Data</h5>
+		</div>			
 	</div>
 
-	<div id="sensorBoxO2">o2-Werte;</div>
+	
 	
 </body>
 

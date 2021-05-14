@@ -46,10 +46,12 @@
 #include <geometry_msgs/PoseStamped.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <visualization_msgs/MarkerArray.h>
 
 #include <explore/costmap_client.h>
 #include <explore/frontier_search.h>
+
 
 namespace explore
 {
@@ -66,6 +68,7 @@ public:
 
   void start();
   void stop();
+  void exploreControlCallback(const std_msgs::Bool& explore_control_msg);
 
 private:
   /**
@@ -88,6 +91,8 @@ private:
   ros::NodeHandle private_nh_;
   ros::NodeHandle relative_nh_;
   ros::Publisher marker_array_publisher_;
+  ros::Subscriber explore_control_sub;
+  
   tf::TransformListener tf_listener_;
 
   Costmap2DClient costmap_client_;

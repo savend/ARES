@@ -159,6 +159,10 @@ add_executable(ares_diagnostics src/ares_diagnostics.cpp)
 add_dependencies(ares_diagnostics ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(ares_diagnostics ${catkin_LIBRARIES})
 
+add_executable(ares_returnToHome src/ares_returnToHome.cpp)
+target_link_libraries(ares_returnToHome ${catkin_LIBRARIES})
+add_dependencies(ares_returnToHome ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
 #############
 ## Install ##
 #############

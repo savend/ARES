@@ -73,22 +73,73 @@
 		// }
 		// setInterval(joint_topic, 10) //Refresh Topic all 10ms
 
+		// emergency_state Setup
+		var listener_EmergencyState = new ROSLIB.Topic({
+			ros : ros,
+			name : '/emergency_button_state',
+			messageType : 'std_msgs/Bool'
+		});
+
+		//Refresh Topic
+		function emergencyState_topic(){
+			listener_emergencyState.subscribe(function(message) {
+				if (message.data)
+				{
+					document.getElementById("emergencyTitle").innerHTML = "Emergency Stop !!";
+					document.getElementById("topright").style.backgroundColor = "red";
+
+				}
+				else
+				{
+					document.getElementById("emergencyTitle").innerHTML = "No Emergency Stop";
+					document.getElementById("emergencyTitle").style.backgroundColor = "";
+				}
+				listener_emergencyState.unsubscribe();
+			});
+		}
+
+		setInterval(emergencyState_topic, 100) //Refresh Topic all 100ms
+
+				// emergency_state Setup
+		var listener_explore = new ROSLIB.Topic({
+			ros : ros,
+			name : '/explore_control',
+			messageType : 'std_msgs/Bool'
+		});
+
+		//Refresh Topic
+		function explore_topic(){
+			listener_explore.subscribe(function(message) {
+				if (message.data)
+				{
+					document.getElementById("auto").innerHTML = "Auto Exploration Active";
+				}
+				else
+				{
+					document.getElementById("auto").innerHTML = "Auto Exporation Off";
+				}
+				listener_explore.unsubscribe();
+			});
+		}
+
+		setInterval(explore_topic, 100) //Refresh Topic all 100ms
+
 		// Object_Temp Setup
-		var listener_ObjTemp = new ROSLIB.Topic({
+		var listener_objTemp = new ROSLIB.Topic({
 			ros : ros,
 			name : '/object_temp',
 			messageType : 'std_msgs/Float64'
 		});
 
 		//Refresh Topic
-		function ObjTemp_topic(){
-			listener_ObjTemp.subscribe(function(message) {
-				document.getElementById("Object_Temp_TextID").innerHTML = message.data;
-				listener_ObjTemp.unsubscribe();
+		function objTemp_topic(){
+			listener_objTemp.subscribe(function(message) {
+				document.getElementById("object_Temp_TextID").innerHTML = Math.round(message.data * 100) / 100;
+				listener_objTemp.unsubscribe();
 			});
 		}
 
-		setInterval(ObjTemp_topic, 1000) //Refresh Topic all 10ms
+		setInterval(objTemp_topic, 1000) //Refresh Topic all 1000ms
 
 		// Ambient_Temp Setup
 		var listener_AmbTemp = new ROSLIB.Topic({
@@ -98,47 +149,50 @@
 		});
 
 		//Refresh Topic
-		function AmbientTemp_topic(){
-			listener_AmbTemp.subscribe(function(message) {
-				document.getElementById("AmbTemp_TextID").innerHTML = message.data;
-				listener_AmbTemp.unsubscribe();
+		function ambientTemp_topic(){
+			listener_ambTemp.subscribe(function(message) {
+				document.getElementById("ambTemp_TextID").innerHTML =  Math.round(message.data * 100) / 100;
+				listener_ambTemp.unsubscribe();
 			});
 		}
-		setInterval(AmbientTemp_topic, 1000) //Refresh Topic all 10ms
+		setInterval(ambientTemp_topic, 1000) //Refresh Topic all 1000ms
 
 		// O2 Setup
-		var listener_O2 = new ROSLIB.Topic({
+		var listener_o2 = new ROSLIB.Topic({
 			ros : ros,
 			name : '/o2_concentration',
 			messageType : 'std_msgs/Float32'
 		});
 
 		//Refresh Topic O2
-		function O2_topic(){
-			listener_O2.subscribe(function(message) {
-				document.getElementById("O2_TextID").innerHTML = message.data;
-				listener_O2.unsubscribe();
+		function o2_topic(){
+			listener_o2.subscribe(function(message) {
+				document.getElementById("o2_TextID").innerHTML =  Math.round(message.data * 100) / 100;
+				listener_o2.unsubscribe();
 			});
 		}
 
-		setInterval(O2_topic, 1000) //Refresh Topic all 10ms
+		setInterval(o2_topic, 1000) //Refresh Topic all 1000ms
 
 		// Battery Setup
-		var listener_Battery = new ROSLIB.Topic({
+		var listener_battery = new ROSLIB.Topic({
 			ros : ros,
 			name : '/battery_state',
 			messageType : 'sensor_msgs/BatteryState'
 		});
 
 		//Refresh Topic Batterystate
-		function BatteryState_topic(){
-			listener_Battery.subscribe(function(message) {
-				document.getElementById("Battery_TextID").innerHTML = message.voltage;
-				listener_Battery.unsubscribe();
+		function batteryState_topic(){
+			listener_battery.subscribe(function(message) {
+				document.getElementById("battery_TextID").innerHTML = Math.round(message.voltage * 100) / 100;
+				listener_battery.unsubscribe();
 			});
 		}
 
-		setInterval(BatteryState_topic, 1000) //Refresh Topic all 10ms
+		setInterval(batteryState_topic, 1000) //Refresh Topic all 1000ms
+
+
+
 	}
 </script>
 </head>
@@ -148,7 +202,9 @@
 
 
 	<header>
-		<h1>Remote Controll-Deck </h1>
+		<img src="ARES_logo.png" width="200px" >
+		<h1>Remote Control-Deck</h1>
+
 	</header>
 			
 
@@ -156,14 +212,14 @@
 
 		<div class="container_stream">
 
-			<h3>Stream ARES</h3>
+			<h3>Video Stream</h3>
 			<div id="mjpeg"></div>
 		</div>
 
 			
 		<div class="container_map">
 			
-			<h3>Map ARES</h3>
+			<h3>Map</h3>
 			<div id="nav"></div>
 		</div>	
 			
@@ -175,30 +231,39 @@
 
 		<div class= "sensor_Box">
 									
-			<h4> O2 WERT [%] </h4>
-			<h5 id= "O2_TextID"> No Data</h5>
+			<h5> General Info </h5>
+			<h4 id="emergencyTitle">No Emergency Stop</h4>
+			<h4 id="auto">Auto Exploration Off</h4>
+
+		</div>
+
+
+		<div class= "sensor_Box">
+									
+			<h5> O2 WERT [%] </h5>
+			<h4 id= "o2_TextID"> No Data</h4>
 
 		</div>
 
 
 		<div class="sensor_Box">
 
-			<h4> OBjTemp [°C]</h4>
-			<h5 id="Object_Temp_TextID"> No Data </h5>
+			<h5> OBjTemp [°C]</h5>
+			<h4 id="object_Temp_TextID"> No Data </h4>
 			
 		</div>
 
 		<div class="sensor_Box">
 
-			<h4> AmbientTemp [°C]</h4>
-			<h5 id ="AmbTemp_TextID"> No Data</h5>
+			<h5> AmbientTemp [°C]</h5>
+			<h4 id ="ambTemp_TextID"> No Data</h4>
 			
 		</div>
 
 		<div class="sensor_Box">
 
-			<h4> Battery [Volts]</h4>
-			<h5 id= "Battery_TextID"> No Data</h5>
+			<h5> Battery [Volts]</h5>
+			<h4 id= "battery_TextID"> No Data</h4>
 		</div>			
 	</div>
 

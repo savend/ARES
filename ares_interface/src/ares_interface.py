@@ -67,7 +67,7 @@ class ImageProcess:
 
         #absFilePath_Haarcadcade= os.path.abspath('haarcascade.xml')
 
-        self.casePath = "/home/rembomaster/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
+        self.casePath = "/home/adrian/catkin_ws/src/ARES/ares_interface/src/haarcascade.xml"
         #self.casePath = "haarcascade.xml"
 
         self.faceCascade: object = cv2.CascadeClassifier(self.casePath)
@@ -77,7 +77,7 @@ class ImageProcess:
         #self.distance_right = 0
         #self.distance_left = 0
         #self.distance_FRONT = 0
-        #self.bridge = CvBridge()
+        self.bridge = CvBridge()
         #self.emergencStop_data = 0
 
         self.img_pub= rospy.Publisher("/image", Image, queue_size=10)
@@ -111,7 +111,7 @@ class ImageProcess:
 
     def camera_color_callback(self, color_msg):
         self.img = self.bridge.imgmsg_to_cv2(color_msg, desired_encoding='bgr8')
-        self.img = self.interfaceDrawing(self.img)
+        #self.img = self.interfaceDrawing(self.img)
         self.img = self.peopleRecnognition(self.img)
         self.img_pub.publish(self.bridge.cv2_to_imgmsg(self.img, encoding='passthrough'))
 

@@ -2,7 +2,7 @@
 	<arg name="model" default="$(find ares_description)/urdf/ares.urdf.xacro"/>
   <param name="robot_description" command="$(find xacro)/xacro $(arg model)" />
 	<arg name="rvizconfig" default="$(find ares_bringup)/rviz/ares.rviz" />
-  <arg name="jsPort" default="js1" />
+  <arg name="jsPort" default="/dev/input/js1" />
   <arg name="explore" default="false" />
 
 
@@ -25,7 +25,7 @@
 
   <!--******INTERFACE*******-->
 
-    <!--   <node pkg="ares_interface" type="ares_interface.py" name="ares_interface" /> -->
+    <node pkg="ares_interface" type="ares_interface.py" name="ares_interface" />
 
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" />
 
@@ -42,7 +42,7 @@
   <!--******TELEOP*******-->
 
     <include file="$(find teleop_twist_joy)/launch/teleop.launch">
-      <arg name="joy_dev" value="/dev/input/js1" />
+      <arg name="joy_dev" value="$(arg jsPort)" />
     </include>
 
     <!--   <node pkg="teleop_twist_joy" type="ares_teleop" if="$(eval teleop_mode == 'keyboard')" output="screen" launch-prefix="xtrem -e"/>

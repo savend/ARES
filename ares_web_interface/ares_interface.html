@@ -74,7 +74,7 @@
 		// setInterval(joint_topic, 10) //Refresh Topic all 10ms
 
 		// emergency_state Setup
-		var listener_EmergencyState = new ROSLIB.Topic({
+		var listener_emergencyState = new ROSLIB.Topic({
 			ros : ros,
 			name : '/emergency_button_state',
 			messageType : 'std_msgs/Bool'
@@ -86,7 +86,7 @@
 				if (message.data)
 				{
 					document.getElementById("emergencyTitle").innerHTML = "Emergency Stop !!";
-					document.getElementById("topright").style.backgroundColor = "red";
+					document.getElementById("emergencyTitle").style.backgroundColor = "red";
 
 				}
 				else
@@ -98,7 +98,7 @@
 			});
 		}
 
-		setInterval(emergencyState_topic, 100) //Refresh Topic all 100ms
+		setInterval(emergencyState_topic, 1000) //Refresh Topic all 100ms
 
 				// emergency_state Setup
 		var listener_explore = new ROSLIB.Topic({
@@ -122,7 +122,7 @@
 			});
 		}
 
-		setInterval(explore_topic, 100) //Refresh Topic all 100ms
+		setInterval(explore_topic, 1000) //Refresh Topic all 100ms
 
 		// Object_Temp Setup
 		var listener_objTemp = new ROSLIB.Topic({
@@ -142,7 +142,7 @@
 		setInterval(objTemp_topic, 1000) //Refresh Topic all 1000ms
 
 		// Ambient_Temp Setup
-		var listener_AmbTemp = new ROSLIB.Topic({
+		var listener_ambTemp = new ROSLIB.Topic({
 			ros : ros,
 			name : '/ambient_temp',
 			messageType : 'std_msgs/Float64'
